@@ -14,7 +14,7 @@ custom_rules: [] # paths to additional .smk files included in the Snakefile
 
 
 # =================== STUDY SETUP ===================
-countries: ["NG", "BJ"] # ISO codes, continent, or custom region
+countries: ["CA"] # ISO codes, continent, or custom region
 # The PyPSA meets Earth initiative also provides some dedicated regional models
 # adopting dedicated input data, country-specific constraints, and other
 # region-specific features:
@@ -44,8 +44,8 @@ scenario:
   - "144h"
 
 snapshots:
-  start: "2013-01-01"
-  end: "2014-01-01"
+  start: "2022-01-01"
+  end: "2022-01-15"
   inclusive: "left" # end is not inclusive
 
 results_dir: results/ # solved networks and sector postprocessing (RESDIR in Snakefile)
@@ -57,12 +57,12 @@ enable:
   # ----------------- Retrieving data -----------------
   retrieve_databundle: true # recommended for first run
   download_osm_data: true # download OpenStreetMap data for the countries specified above
-  retrieve_cutout: true # retrieves the bundled 2013 cutout (cutout-2013-era5); changing load_options.weather_year (default: 2013) requires retrieve_cutout:false and build_cutout: true.
+  retrieve_cutout: false # bundled cutout only covers 2013; disabled since we build a custom 2022 cutout for CA below
   retrieve_cost_data: true # false: use existing data/costs.csv
-  retrieve_databundle_sector: true
+  retrieve_databundle_sector: false # not needed to run only up to add_electricity (electricity-only, no sector coupling)
   download_global_buildings: false # download GlobalMLBuildingFootprints data for the countries specified above
   # ----------------- Building locally -----------------
-  build_cutout: false # requires CDS API key (see https://cds.climate.copernicus.eu/how-to-api); uses snapshots and countries
+  build_cutout: false # cutouts/cutout-2022-era5.nc already built successfully; flip back to true only if it needs rebuilding (e.g. snapshots or countries change)
   build_natura_raster: false
   # ----------------- Advanced -----------------
   progress_bar: true
@@ -188,8 +188,8 @@ base_network:
 
 # ------------------- Demand -------------------
 load_options:
-  source: "gegis" # "gegis" (scenario-based: 2011, 2013, 2018 available) or "demcast" (hourly 2000–2024 available): view [issue #1724](https://github.com/pypsa-meets-earth/pypsa-earth/issues/1724) for more details
-  weather_year: 2013 # Weather year of the load profile
+  source: "demcast" # "gegis" only ships weather years 2011/2013/2018; "demcast" (hourly 2000-2024) is used here to match snapshots in 2022
+  weather_year: 2022 # Weather year of the load profile; must match the snapshots' calendar year when source is "demcast"
   prediction_year: 2030 # Valid only if "gegis" used as a source
   scale: 1 # scales all load time-series, i.e. 2 = doubles load
 
@@ -288,7 +288,7 @@ transformers:
 atlite:
   nprocesses: 4
   cutouts:
-    cutout-2013-era5:
+    cutout-2022-era5:
       module: era5
       dx: 0.3 # cutout resolution
       dy: 0.3 # cutout resolution
@@ -297,7 +297,7 @@ atlite:
       # The cutout spatial extent [x,y] is automatically set by country selection. See `countries:` option above and 'build_cutout.py'.
       # x: [-12., 35.]  # set cutout range manual, instead of automatic by boundaries of country
       # y: [33., 72]    # manual set cutout range
-  default: cutout-2013-era5
+  default: cutout-2022-era5
 
 renewable:
   onwind:

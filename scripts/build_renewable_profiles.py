@@ -573,6 +573,28 @@ if __name__ == "__main__":
     # do not pull up, set_index does not work if geo dataframe is empty
     regions = regions.set_index("name").rename_axis("bus")
 
+    # Drop region geometries whose bounding box is thinner (in either x or
+    # y) than roughly one pixel of the finest exclusion raster (~100 m,
+    # i.e. ~0.001 deg at these latitudes). Numerical slivers from the
+    # Voronoi/clipping step in build_bus_regions can be that thin; when
+    # they are, atlite's availabilitymatrix raster-transform computation
+    # divides by a zero "covered_res" (NaN in atlite.gis.pad_extent),
+    # crashing the whole rule. A 0.01 deg (~1 km) margin is comfortably
+    # above that pixel size, so this only drops genuine slivers -- not
+    # real, usable small regions.
+    bounds = regions.geometry.bounds
+    min_extent = (bounds.maxx - bounds.minx).clip(lower=0).combine(
+        (bounds.maxy - bounds.miny).clip(lower=0), min
+    )
+    sliver = min_extent < 0.01
+    if sliver.any():
+        logger.warning(
+            f"Dropping {sliver.sum()} region(s) with a sub-pixel-thin bounding "
+            f"box (numerical slivers, not real usable area): "
+            f"{list(regions.index[sliver])}"
+        )
+        regions = regions.loc[~sliver]
+
     if nprocesses > 1:
         client = Client(n_workers=nprocesses, threads_per_worker=1)
     else:

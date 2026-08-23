@@ -125,7 +125,7 @@ if __name__ == "__main__":
         offshore = gpd.read_file(offshore_shapes)
         regions = pd.concat([onshore, offshore])
         d = max(cutout_params.get("dx", 0.25), cutout_params.get("dy", 0.25)) * 2
-        cutout_params["bounds"] = regions.total_bounds + [-d, -d, d, d]
+        cutout_params["bounds"] = tuple(regions.total_bounds + [-d, -d, d, d])
     elif {"x", "y"}.issubset(cutout_params):
         cutout_params["x"] = slice(*cutout_params["x"])
         cutout_params["y"] = slice(*cutout_params["y"])

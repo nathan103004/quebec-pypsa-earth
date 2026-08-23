@@ -17,11 +17,6 @@ generators/storage units were pared down to real Quebec plants -- see
 attach_real_generators.py); this only DISPLAYS buses/lines in and around
 Quebec, not the whole country.
 
-Known finding worth looking for on the map: Churchill Falls (bus 465) has
-exactly one line touching it, at 66 kV -- nowhere near enough capacity for
-its 5,428 MW of generation. The raw OSM-derived topology never captured
-the real 735 kV Churchill Falls tie into Quebec's grid.
-
 Usage
 -----
     python network/visualize_real_network_map.py
@@ -273,11 +268,7 @@ def main():
     fig.update_layout(
         mapbox=dict(style="open-street-map", zoom=zoom, center=center),
         margin=dict(l=0, r=0, t=50, b=0),
-        title=(
-            "Quebec real-generator network -- voltage levels, substations, loads & generators"
-            "<br><sub>Note: Churchill Falls (5,428 MW) sits on a single 66 kV line -- "
-            "the raw topology never captured its real 735 kV tie into Quebec's grid.</sub>"
-        ),
+        title="Quebec real-generator network -- voltage levels, substations, loads & generators",
         legend=dict(bgcolor="rgba(255,255,255,0.85)", font=dict(size=10)),
         width=1600,
         height=1200,

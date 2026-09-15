@@ -4,13 +4,13 @@ reduce_voltage_network.py
 
 Voltage-based network reduction: keep only the >=315 kV backbone
 (buses/lines/transformers) within the Quebec + Churchill Falls region,
-since that's the only voltage range with real, trustworthy electrical
-parameters (sub-315 kV lines have no matched real impedance data --
-see the "215/242 overloaded lines are sub-230kV, no impedance data
-anywhere" finding from earlier in this project). Every load and every
-generator/storage unit is preserved -- none are dropped, only
-reassigned onto the nearest surviving >=315 kV bus if their own bus
-gets removed.
+since that's the only voltage range with real, matched line impedance
+data. Every load and every generator/storage unit is preserved -- none
+are dropped, only reassigned onto the nearest surviving >=315 kV bus if
+their own bus gets removed.
+
+See network/docs/DEBUGGING_HISTORY.md for the issues found and fixed in this
+script's development (bridge-bus fragmentation, load consolidation).
 
 Steps
 -----
@@ -19,16 +19,15 @@ Steps
 2. Split region buses into "backbone" (v_nom >= 315 kV) and "local"
    (< 315 kV).
 3. For each local bus, find its nearest backbone bus (straight-line
-   distance -- fine at this scale, no need for electrical distance).
+   distance).
 4. Reassign every load, generator, and storage unit sitting on a local
-   bus onto that nearest backbone bus. Nothing is dropped or deleted --
-   only its `bus` attribute changes.
+   bus onto that nearest backbone bus. Goal is to make sure nothing is dropped or deleted 
 5. Drop local buses, and every line/transformer/link that isn't
    entirely between two surviving backbone buses.
 
 Usage
 -----
-    python network/reduce_voltage_network.py --network networks/elec_real_generators_hydro2022_cftie.nc
+    python network/reduce_voltage_network.py --network networks/elec_full.nc
 """
 import argparse
 import os
@@ -43,7 +42,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 NETWORK_DIR = os.path.dirname(os.path.abspath(__file__))
 GADM_PATH = os.path.join(BASE_DIR, "data", "gadm", "gadm41_CAN", "gadm41_CAN.gpkg")
 
-DEFAULT_NETWORK = os.path.join(BASE_DIR, "networks", "elec_real_generators_hydro2022_cftie.nc")
+DEFAULT_NETWORK = os.path.join(BASE_DIR, "networks", "elec_full.nc")
 
 CHURCHILL_735_LAT = 53.5289404
 CHURCHILL_735_LON = -63.9768688
@@ -133,10 +132,7 @@ def main():
     # --- Drop everything outside the Quebec + Churchill Falls region
     #     entirely: this is meant to be a REDUCED network, and the rest of
     #     Canada is untouched leftover from the original all-Canada OSM
-    #     build -- no real generators live there (verified: all real
-    #     generators/storage are region-scoped), only synthetic loads
-    #     nobody asked to keep. Components on these buses are removed
-    #     first so no dangling references are left when the buses go.
+    #     build.
     # ---------------------------------------------------------------
     outside_buses = n.buses.index.difference(region_buses.index)
     outside_gens = n.generators.index[n.generators.bus.isin(outside_buses)]

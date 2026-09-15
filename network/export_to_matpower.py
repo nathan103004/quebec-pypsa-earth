@@ -3,41 +3,37 @@
 export_to_matpower.py
 
 Export the solved main-island network to a MATPOWER case (.m) file, for
-running AC OPF / AC PF in MATLAB/MATPOWER directly, as a cross-check
-against PyPSA's own n.pf() (which hit an unresolved convergence issue --
-see the conversation this script came out of).
+running AC OPF / AC PF in MATLAB/MATPOWER directly, as an independent
+cross-check against PyPSA's own n.pf().
 
-Scope: the main AC network only (209 buses, lines+transformers) -- the 5
-Link-only DC "islands" (buses 65/161/1015/2206/3549) are dropped, same as
-every AC PF test earlier in this project, since MATPOWER's base case
-format has no native DC-link representation and those buses are a small,
-separate part of the network anyway.
+Scope: the main AC network only (lines+transformers) -- Link-only DC
+"islands" are dropped, since MATPOWER's base case format has no native
+DC-link representation.
 
 One snapshot only, since a MATPOWER case is a static single-operating-point
 model, not a time series. Defaults to the network's worst-loaded hour
 (most interesting for a congestion study); pick any other with
 --snapshot-index.
 
-Per-unit conversion, since MATPOWER expects everything on one common
-system base (--base-mva, default 100 MVA) and PyPSA stores r_pu/x_pu on
-two DIFFERENT implicit bases depending on component type (confirmed
-directly from PyPSA's own source, pypsa/pf.py):
+Per-unit conversion: MATPOWER expects everything on one common system base
+(--base-mva, default 100 MVA), but PyPSA stores r_pu/x_pu on two different
+implicit bases depending on component type (pypsa/pf.py):
   - Lines:        x_pu = x / v_nom**2       -- implicit 1 MVA base
   - Transformers: x_pu = x / s_nom          -- each transformer's OWN s_nom as base
-Both get rescaled to the system base via the standard Z_pu_new =
+Both are rescaled to the system base via the standard Z_pu_new =
 Z_pu_old * (S_new / S_old) relation.
 
-Generator reactive capability (Qmax/Qmin) isn't in our data (no real
-generator Q-capability curves), needed for MATPOWER's mandatory columns.
-Uses a generic +-tan(acos(0.85)) * Pmax assumption -- wider than the
-0.95 power-factor assumption used for load Q elsewhere in this project,
-since generator reactive capability is normally larger than a typical
-load's power factor. Flagged here as generic, not measured, same
-honesty standard as every other placeholder assumption in this project.
+Generator reactive capability (Qmax/Qmin) isn't in the source data (no real
+generator Q-capability curves), but is a mandatory MATPOWER column. Uses a
+generic +-tan(acos(0.85)) * Pmax assumption -- not measured.
+
+See network/docs/DEBUGGING_HISTORY.md for issues found while building this
+export (per-unit base mismatch, missing shunt data, missing DC-seeded
+start).
 
 Usage
 -----
-    python network/export_to_matpower.py --network networks/elec_main_island_solved.nc
+    python network/export_to_matpower.py --network networks/elec_solved.nc
 """
 import argparse
 import os
@@ -51,24 +47,19 @@ import pypsa
 NETWORK_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.dirname(NETWORK_DIR)
 
-DEFAULT_NETWORK = os.path.join(BASE_DIR, "networks", "elec_main_island_solved.nc")
-# Writes directly to MATPOWER's data folder -- where it's actually run
-# from -- not this project's own network/ folder, after losing time
-# earlier to two different copies silently going out of sync.
+DEFAULT_NETWORK = os.path.join(BASE_DIR, "networks", "elec_solved.nc")
+# Writes directly to MATPOWER's data folder, where it's actually run from.
 DEFAULT_OUTPUT = r"C:\Users\hjgua\Documents\MATLAB\matpower8.1\data\quebec_main_island.m"
 
 BASE_MVA = 100.0
 GEN_PF_ASSUMED = 0.85  # generic reactive-capability assumption, not measured
 V_MAG_MIN, V_MAG_MAX = 0.95, 1.05
 
-# Many generators (hydro/ror) share an identical $0/MWh marginal cost with
-# zero curvature -- a flat, degenerate cost function is a known cause of a
-# singular KKT matrix in interior-point OPF solvers (MATPOWER's MIPS
-# reported this directly: "Matrix is close to singular", RCOND ~1e-16,
-# even after fixing the separate transformer-r=0 issue below). A tiny
-# quadratic term breaks the degeneracy without materially changing the
-# economics -- at 1000 MW dispatch it adds about 2*eps*1000 = 0.2 $/MWh
-# to the effective marginal cost, negligible next to real cost spreads.
+# Many generators share an identical $0/MWh marginal cost with zero
+# curvature -- a flat, degenerate cost function causes a singular KKT
+# matrix in interior-point OPF solvers. A tiny quadratic term breaks the
+# degeneracy without materially changing the economics (negligible next to
+# real cost spreads at typical dispatch levels).
 GENCOST_QUADRATIC_EPS = 1e-4
 
 
@@ -85,12 +76,8 @@ def main():
     print(f"Loading: {args.network}")
     n = pypsa.Network(args.network)
 
-    # Transformer resistance isn't persisted in the saved network (only x
-    # is) -- same generic X/R=30 fix used for AC PF work earlier. Without
-    # this every transformer exports with r=0 exactly, which is a classic
-    # cause of "badly scaled" / near-singular failures in AC solvers
-    # (confirmed directly: MATPOWER's MIPS interior-point OPF failed with
-    # RCOND ~2e-19 on an export that had this bug).
+    # Transformer resistance isn't persisted in the saved network (only x is) --
+    # generic X/R=30 assumption, same as run_pf.py's AC PF preparation.
     n.transformers["r"] = n.transformers["x"] / 30.0
     n.calculate_dependent_values()
 
@@ -117,6 +104,16 @@ def main():
     buses = n.buses.loc[list(main_ac)].copy()
     bus_id = {b: i + 1 for i, b in enumerate(buses.index)}  # MATPOWER bus IDs are 1-based integers
 
+    # Seed bus voltage angles from a fresh DC PF solve at this snapshot, on a throwaway
+    # copy of the network (so it can't disturb the generator dispatch read below) --
+    # matches run_pf.py, which always seeds n.pf() from n.lpf() rather than a flat start.
+    n_seed = n.copy()
+    n_seed.set_snapshots([snap])
+    n_seed.lpf(n_seed.snapshots)
+    va_deg_by_bus = np.degrees(n_seed.buses_t.v_ang.loc[snap]).reindex(buses.index, fill_value=0.0)
+    print(f"  DC-seeded starting angles: {va_deg_by_bus.min():.2f} to {va_deg_by_bus.max():.2f} deg "
+          "(exported as bus.Va, not a flat 0 start)")
+
     lines = n.lines[n.lines.bus0.isin(main_ac) & n.lines.bus1.isin(main_ac)]
     trafos = n.transformers[n.transformers.bus0.isin(main_ac) & n.transformers.bus1.isin(main_ac)]
     gens = n.generators[(n.generators.bus.isin(main_ac)) & (n.generators.carrier != "load_shedding")]
@@ -127,6 +124,17 @@ def main():
     load_p_by_bus = n.loads_t.p_set.loc[snap, loads.index].groupby(loads.bus).sum().reindex(buses.index, fill_value=0.0)
     pf_angle = np.arccos(0.95)
     load_q_by_bus = load_p_by_bus * np.tan(pf_angle)
+
+    # Shunt capacitors: MATPOWER's Gs/Bs are real MW/MVAr demanded/injected at
+    # V=1.0pu, not a per-unit value; PyPSA's b (Siemens) -> b_pu = b * v_nom**2
+    # (implicit 1 MVA base) numerically equals that same MVAr figure at V=1pu,
+    # so no further base rescaling is needed here (unlike branch r/x below).
+    shunts = n.shunt_impedances[n.shunt_impedances.bus.isin(main_ac)] if len(n.shunt_impedances) else n.shunt_impedances
+    bs_by_bus = pd.Series(0.0, index=buses.index)
+    if len(shunts):
+        b_mvar = shunts.b * shunts.bus.map(n.buses.v_nom) ** 2
+        bs_by_bus = b_mvar.groupby(shunts.bus).sum().reindex(buses.index, fill_value=0.0)
+        print(f"  {len(shunts)} shunt capacitors carried over ({bs_by_bus.sum():.0f} MVAr total at V=1.0pu)")
 
     slack_gen = n.generators.index[n.generators.control == "Slack"]
     slack_bus = n.generators.at[slack_gen[0], "bus"] if len(slack_gen) else buses.index[0]
@@ -142,7 +150,7 @@ def main():
             btype = 1
         bus_rows.append([
             bus_id[b], btype, load_p_by_bus[b], load_q_by_bus[b],
-            0.0, 0.0, 1, 1.0, 0.0, row.v_nom, 1, V_MAG_MAX, V_MAG_MIN,
+            0.0, bs_by_bus[b], 1, 1.0, va_deg_by_bus[b], row.v_nom, 1, V_MAG_MAX, V_MAG_MIN,
         ])
 
     # --- generator data (plain Generators + StorageUnit dispatch, both as MATPOWER gens) ---
@@ -218,7 +226,7 @@ def main():
 
     print(f"\nWritten -> {args.output}")
     print(f"  buses: {len(bus_rows)}, generators: {len(gen_rows)}, branches: {len(branch_rows)}")
-    print(f"  Run in MATLAB with: mpc = quebec_main_island; results = runpf(mpc); / runopf(mpc);")
+    print(f"  Run in MATLAB with: mpc = {args.case_name}; results = runpf(mpc); / runopf(mpc);")
 
 
 if __name__ == "__main__":

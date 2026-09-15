@@ -24,7 +24,7 @@ BASE_DIR = os.path.dirname(NETWORK_DIR)
 sys.path.insert(0, NETWORK_DIR)
 from visualize_real_network_map import exact_map_bounds  # noqa: E402
 
-DEFAULT_NETWORK = os.path.join(BASE_DIR, "networks", "elec_main_island_solved.nc")
+DEFAULT_NETWORK = os.path.join(BASE_DIR, "networks", "elec_solved.nc")
 DEFAULT_OUTPUT = os.path.join(NETWORK_DIR, "congestion_zoom_map.html")
 LOADING_THRESHOLD = 0.9
 

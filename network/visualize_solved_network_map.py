@@ -3,7 +3,7 @@
 visualize_solved_network_map.py
 
 Map of the solved main-island (simplified/reduced) network
-(networks/elec_main_island_solved.nc, see run_lopf_main_island.py):
+(networks/elec_solved.nc, see run_lopf_main_island.py):
 
 - Lines, colored by congestion level (max loading over all snapshots as a
   fraction of s_nom) -- green/amber/orange/red buckets. Both the LOPF
@@ -46,7 +46,7 @@ from visualize_real_network_map import (  # noqa: E402
     jitter_colocated,
 )
 
-DEFAULT_NETWORK = os.path.join(BASE_DIR, "networks", "elec_main_island_solved.nc")
+DEFAULT_NETWORK = os.path.join(BASE_DIR, "networks", "elec_solved.nc")
 DEFAULT_OUTPUT = os.path.join(NETWORK_DIR, "quebec_reduced_network_map.html")
 
 CONGESTION_BUCKETS = [

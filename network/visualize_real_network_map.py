@@ -6,8 +6,10 @@ Interactive map of the real-generator Quebec network
 (networks/elec_real_generators.nc, see attach_real_generators.py), showing:
 
 - Substations (buses), sized by number of lines connected.
-- Transmission lines, colored by voltage level, width scaled by
-  num_parallel (equivalent parallel circuit count).
+- Transmission lines, colored by voltage level, width scaled by voltage
+  (num_parallel is not used for width: in this dataset it's a per-row
+  attribute, almost always 1.0, not a real per-corridor circuit count --
+  multi-circuit corridors are stored as multiple separate Line rows).
 - Loads, as a separate marker layer sized by mean demand.
 - Generators/storage units, as a separate marker layer per carrier,
   sized by capacity, labeled by plant name.
@@ -35,7 +37,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 NETWORK_DIR = os.path.dirname(os.path.abspath(__file__))
 GADM_PATH = os.path.join(BASE_DIR, "data", "gadm", "gadm41_CAN", "gadm41_CAN.gpkg")
 
-DEFAULT_NETWORK = os.path.join(BASE_DIR, "networks", "elec_real_generators_hydro2022_cftie.nc")
+DEFAULT_NETWORK = os.path.join(BASE_DIR, "networks", "elec_full.nc")
 DEFAULT_OUTPUT = os.path.join(NETWORK_DIR, "quebec_real_network_map.html")
 
 # "465-735kv" after add_churchill_falls_tie.py (the real 735 kV yard); falls
@@ -171,9 +173,15 @@ def main():
     fig = go.Figure()
 
     # --- Lines, grouped by voltage so each gets one legend entry ---
+    # Width scales with voltage only. `num_parallel` is deliberately not used
+    # here: in this dataset it's a per-row attribute (almost always 1.0), not
+    # a per-corridor circuit count -- real multi-circuit corridors are stored
+    # as multiple separate Line rows instead of one row with num_parallel>1,
+    # so averaging that attribute is misleading (see the corridor-grouping
+    # analysis done in the conversation this came from).
     for v_nom, grp in lines.groupby("v_nom"):
         color = VOLTAGE_COLORS.get(v_nom, DEFAULT_LINE_COLOR)
-        width = float(np.clip(1.0 + 1.6 * np.sqrt(grp["num_parallel"].clip(lower=0.1).mean()), 1.0, 8.0))
+        width = float(np.clip(1.0 + 1.2 * np.log1p(v_nom / 100), 1.0, 8.0))
         lats, lons, hover = [], [], []
         for _, line in grp.iterrows():
             if line.bus0 not in n.buses.index or line.bus1 not in n.buses.index:
@@ -186,7 +194,7 @@ def main():
                 lat=lats, lon=lons, mode="lines",
                 line=dict(width=width, color=color),
                 opacity=0.85,
-                name=f"{v_nom:.0f} kV ({len(grp)} lines, avg {grp.num_parallel.mean():.1f} parallel)",
+                name=f"{v_nom:.0f} kV ({len(grp)} lines)",
                 hoverinfo="skip",
             )
         )

@@ -12,7 +12,7 @@ answer instead of inferring it from Jacobian behavior.
 
 Usage
 -----
-    python network/continuation_pf.py --network networks/elec_main_island_solved.nc
+    python network/continuation_pf.py --network networks/elec_solved.nc
 """
 import argparse
 import logging
@@ -24,10 +24,11 @@ import pandas as pd
 import pypsa
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DEFAULT_NETWORK = os.path.join(BASE_DIR, "networks", "elec_main_island_solved.nc")
+DEFAULT_NETWORK = os.path.join(BASE_DIR, "networks", "elec_solved.nc")
 
 TRANSFORMER_X_R_RATIO = 30.0
 LOAD_POWER_FACTOR = 0.95
+GENERATOR_POWER_FACTOR = 0.9
 PV_MIN_CAPACITY_MW = 100.0
 PV_MAX_LOAD_RATIO = 0.10
 
@@ -40,6 +41,18 @@ def prepare(n: pypsa.Network) -> None:
 
     n.generators["control"] = "PQ"
     gens = n.generators[n.generators.carrier != "load_shedding"]
+
+    # Fixed reactive capability based on installed capacity (p_nom), not
+    # current dispatch -- a real synchronous machine can supply close to its
+    # full reactive capability even at zero real output (that's literally how
+    # synchronous condensers work), so tying it to dispatched p would give
+    # zero Q support from exactly the idle-but-present local generators that
+    # matter most for local voltage support. Set on the static column so it
+    # applies to every snapshot automatically via get_as_dense's static/
+    # time-varying merge -- no need to touch generators_t.q_set at all.
+    gen_pf_angle = np.arccos(GENERATOR_POWER_FACTOR)
+    n.generators.loc[gens.index, "q_set"] = n.generators.loc[gens.index, "p_nom"] * np.tan(gen_pf_angle)
+
     cap_by_bus = gens.groupby("bus").p_nom.sum()
     mean_load_by_bus = n.loads_t.p_set.T.groupby(n.loads.bus).sum().mean(axis=1).reindex(cap_by_bus.index, fill_value=0.0)
     load_ratio = mean_load_by_bus / cap_by_bus

@@ -9,14 +9,15 @@ levels of detail for different purposes.
 | | Unreduced | 315kV (main) | 735kV backbone |
 |---|---|---|---|
 | Buses | 4,013 | 208 | 58 |
-| Lines | 4,546 | 276 | 109-115* |
+| Lines | 4,546 | 276 | 109 |
 | Generators (real) | 68 | 65 | 27 |
 | Storage units | 18 | 18 | 10 |
 | Load served | -- | 0% shed | -- |
-| AC power flow | not attempted | not yet converged | 168/168 converged |
+| AC power flow | not attempted | 0/168 | 50/168 (**168/168 at 85% of demand**) |
 
-*109 in the network as currently reduced from the live pipeline; 115 in the network validated
-against full AC power flow (see [POWER_FLOW.md](docs/POWER_FLOW.md) for why these differ).
+The 735kV backbone converges fully once demand is reduced to 85% of its current level -- current
+real demand exceeds its loadability margin. The 315kV network doesn't respond to demand reduction
+the same way; see [POWER_FLOW.md](docs/POWER_FLOW.md) for the full investigation.
 
 See [docs/NETWORKS.md](docs/NETWORKS.md) for what each network is for and how they relate.
 
@@ -34,15 +35,11 @@ elec_solved.nc  (the main working network)
       |  reduce_to_735kv.py       -- reduce to 735/765kV backbone only
       v
 elec_735kv.nc
-      |  run_pf.py --method pf    -- full nonlinear AC power flow
-      v
+      |  run_pf.py --method pf    -- full nonlinear AC power flow (does not fully converge at
+      v                              current demand -- see POWER_FLOW.md)
 elec_735kv_pf.nc
       |  export_to_matpower.py    -- optional MATPOWER cross-check
 ```
-
-Each script's docstring describes its own inputs, outputs, and method. Debugging narrative --
-what broke, how it was diagnosed, and what fixed it -- lives separately in
-[docs/DEBUGGING_HISTORY.md](docs/DEBUGGING_HISTORY.md) so the scripts themselves stay readable.
 
 ## Documentation
 
@@ -52,8 +49,6 @@ what broke, how it was diagnosed, and what fixed it -- lives separately in
 - [docs/ASSUMPTIONS_AND_LIMITATIONS.md](docs/ASSUMPTIONS_AND_LIMITATIONS.md) -- every generic
   assumption used, and known gaps in the data
 - [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md) -- where the real data comes from
-- [docs/DEBUGGING_HISTORY.md](docs/DEBUGGING_HISTORY.md) -- issues found and fixed during
-  development
 
 ## Running the pipeline
 

@@ -10,7 +10,7 @@ units after `reduce_voltage_network.py`'s reassignment (none dropped); capacitie
 | Onshore wind (`onwind`) | 35 | 3,412 | Real HQ wind farm list; dispatched by weather-derived capacity factor |
 | Solar (`solar`) | 3 | 12 | Real facility list; dispatched by weather-derived capacity factor |
 | OCGT (gas) | 1 | 411 | Real 2022 hourly `Thermique` dispatch |
-| Load shedding | 191 | 41,423 (sized to local peak) | Synthetic VOLL placeholder, $10,000/MWh, one per load bus |
+| Load shedding | 191 | 39,260 (sized to local peak) | Synthetic VOLL placeholder, $10,000/MWh, one per load bus |
 | Churchill Falls import (`AC`, at slack) | 1 | 7,722 | Real interconnection, added by `add_churchill_falls_tie.py` |
 
 Load-shedding generators are a modeling device, not real capacity: they exist so LOPF can shed

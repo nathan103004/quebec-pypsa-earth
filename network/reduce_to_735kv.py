@@ -8,8 +8,7 @@ re-optimized via LOPF; it carries the already-solved dispatch forward as
 fixed data).
 
 735kV and 765kV are treated as a single "735kV" tier: they have essentially
-identical reactance-per-km (within 1%), and s_nom ranges overlap -- no real
-engineering distinction between them in this data.
+identical reactance-per-km (within 1%).
 
 Method
 ------
@@ -29,11 +28,6 @@ Method
    merged into one aggregate unit. p_nom = sum of the originals' p_nom.
    Dispatch is the sum of the already-solved actual dispatch from
    elec_solved.nc (not re-derived), written into p_set.
-
-See network/docs/DEBUGGING_HISTORY.md for the issues found and fixed in this
-script's development (near-singular bridge-line admittance, straight-line
-vs. graph-distance reassignment, load-shedding placeholders in slack
-candidacy).
 
 Usage
 -----
@@ -76,7 +70,7 @@ def convert_transformer_to_line(n: pypsa.Network) -> dict:
     """Equivalent Line for the 735-765 bridge transformer, sized from the 735kV
     fleet's own average reactance-per-km over a short nominal length -- not from
     the transformer's own per-unit reactance, which converts to a near-zero,
-    numerically pathological value (see network/docs/DEBUGGING_HISTORY.md)."""
+    numerically pathological value."""
     t = n.transformers.loc[BRIDGE_TRANSFORMER]
     fleet_735 = n.lines[(n.lines.bus0.map(n.buses.v_nom) == UNIFIED_VOLTAGE) &
                          (n.lines.bus1.map(n.buses.v_nom) == UNIFIED_VOLTAGE)]
@@ -200,7 +194,7 @@ def main():
 
     # Slack: largest-capacity plain Generator, excluding load_shedding.
     # PyPSA's find_slack_bus()/find_bus_controls() only ever look at Generator
-    # components, never StorageUnit -- see network/docs/DEBUGGING_HISTORY.md.
+    # components, never StorageUnit.
     print("\nAssigning slack (largest-capacity plain Generator, excluding load_shedding)...")
     real_gens = n.generators[n.generators.carrier != "load_shedding"]
     slack_gen = real_gens.p_nom.idxmax()

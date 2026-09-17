@@ -9,9 +9,6 @@ data. Every load and every generator/storage unit is preserved -- none
 are dropped, only reassigned onto the nearest surviving >=315 kV bus if
 their own bus gets removed.
 
-See network/docs/DEBUGGING_HISTORY.md for the issues found and fixed in this
-script's development (bridge-bus fragmentation, load consolidation).
-
 Steps
 -----
 1. Scope to the Quebec + Churchill Falls display region (same polygon

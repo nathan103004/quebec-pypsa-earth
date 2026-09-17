@@ -23,29 +23,24 @@ surviving backbone bus -- no load, generator, or storage unit is dropped, only r
 `run_lopf_main_island.py` then extracts the single largest connected island and solves LOPF on it.
 
 This is the main working network: real 2022 dispatch is solved here, at the finest resolution
-this pipeline reaches. Demand: 32,102 MW mean, 41,369 MW peak over the solved week
-(2022-01-01 to 2022-01-07). **0% load shed.**
+this pipeline reaches. Demand: 32,421 MW mean over the solved week (2022-01-01 to 2022-01-07,
+calibrated against real whole-January-2022 system demand). **0% load shed.**
 
 This is also the network AC power flow would need to converge on for genuinely representative
-contingency analysis -- and the network on which it has not yet converged (see
-[POWER_FLOW.md](POWER_FLOW.md)).
+contingency analysis. It does not: **0/168** under full nonlinear AC PF, and unlike the 735kV
+network below, reducing demand doesn't help either (still 0/168 at 85% of current demand) -- its
+failure mode is structurally different and not yet understood. See
+[POWER_FLOW.md](POWER_FLOW.md).
 
-## 3. 735kV backbone (`elec_735kv.nc` -> `elec_735kv_pf.nc`)
+## 3. 735kV backbone (`elec_735kv.nc`)
 
-58 buses. A further reduction from the solved 315kV network down to just the 735/765kV backbone
-(`reduce_to_735kv.py`), aggregating everything else onto backbone buses by graph shortest-path
-(real cumulative line length, not straight-line distance). Carries forward the already-solved
-dispatch from `elec_solved.nc` as fixed injections rather than re-optimizing.
+58 buses, 109 lines. A further reduction from the solved 315kV network down to just the 735/765kV
+backbone (`reduce_to_735kv.py`), aggregating everything else onto backbone buses by graph
+shortest-path (real cumulative line length, not straight-line distance). Carries forward the
+already-solved dispatch from `elec_solved.nc` as fixed injections rather than re-optimizing.
 
-Purpose-built for AC power flow tractability: small and heavily meshed enough that full nonlinear
-convergence is achievable, which the 315kV network has not managed. Trade-off: it's a coarser
-representation, so results on it stand in for backbone-level stress, not a substitute for solving
-the full 315kV network.
-
-Two variants exist on disk:
-- `elec_735kv.nc` (109 lines) -- the current, direct output of the reduction pipeline described
-  above, reflecting the same real per-corridor circuit counts as `elec_full.nc`.
-- `elec_735kv_pf.nc` (115 lines) -- the network validated against full AC power flow (168/168
-  snapshots converged). Built from an earlier point in the pipeline; see
-  [ASSUMPTIONS_AND_LIMITATIONS.md](ASSUMPTIONS_AND_LIMITATIONS.md) for the known gap between the
-  two and why it hasn't yet been closed.
+Purpose-built for AC power flow tractability: small and heavily meshed, so it was expected to
+converge more readily than the 315kV network. It gets closer but still doesn't fully converge at
+current demand (**50/168**) -- see [POWER_FLOW.md](POWER_FLOW.md) for the investigation, including
+a real fix at 85% of current demand (168/168) and a likely contributing data-quality issue
+(straight-line load reassignment dumping demand from up to 281km away onto one weak bus).

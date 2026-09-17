@@ -25,6 +25,10 @@ All under `network/`:
   population/GDP demand proxy (`regional_demand.py`, `rescale_demand_regional.py`). Matched to
   17 of Quebec's real administrative regions; see
   [ASSUMPTIONS_AND_LIMITATIONS.md](ASSUMPTIONS_AND_LIMITATIONS.md) for buses outside that match.
+- `historique-demande-electricite-quebec.csv` -- real hourly Hydro-Québec system-wide demand,
+  full year 2022. Used to calibrate `DEMAND_SCALE_FACTOR` in `run_lopf_main_island.py` against
+  the real whole-January-2022 mean (32,421 MW), and to validate the solved network's demand
+  shape/level (correlation 0.979 against this series once timezone-aligned correctly).
 
 ## Line electrical parameters
 

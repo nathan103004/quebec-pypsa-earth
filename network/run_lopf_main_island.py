@@ -53,7 +53,10 @@ CEILING_MARGIN = 1.10
 # totals only for buses matched to one of Quebec's 17 real administrative
 # regions -- buses outside that scope keep smaller synthetic values and are
 # never rescaled. This closes that gap against real system-wide demand.
-DEMAND_SCALE_FACTOR = 1.042
+# Calibrated against the real whole-January-2022 mean system demand (32,421
+# MW, historique-demande-electricite-quebec.csv) rather than the single
+# solved week alone.
+DEMAND_SCALE_FACTOR = 1.1142
 
 
 def largest_island_buses(n: pypsa.Network) -> set:
@@ -72,14 +75,14 @@ def main():
     parser.add_argument("--solver", default="highs")
     parser.add_argument("--voll", type=float, default=10000.0, help="Value of lost load, $/MWh, for the load-shedding slack generators.")
     parser.add_argument("--output", default=None)
-    parser.add_argument("--snapshots", type=int, default=None, help="Limit to the first N snapshots (e.g. 168 for one week of hourly data).")
+    parser.add_argument("--snapshots", type=int, default=168, help="Limit to the first N snapshots (default 168 = one week of hourly data; pass 0 for the network's full range).")
     args = parser.parse_args()
 
     print(f"Loading network: {args.network}")
     n = pypsa.Network(args.network)
     print(f"  {len(n.buses)} buses total")
 
-    if args.snapshots is not None:
+    if args.snapshots:
         n.set_snapshots(n.snapshots[:args.snapshots])
         print(f"  Limited to first {len(n.snapshots)} snapshots ({n.snapshots[0]} to {n.snapshots[-1]})")
 
@@ -226,8 +229,8 @@ def main():
 
     # Slack: largest TOTAL generation capacity (Generator + StorageUnit
     # combined) within the largest AC-connected component. PyPSA's own
-    # bus-control logic only reads Generator.control, never StorageUnit --
-    # see network/docs/DEBUGGING_HISTORY.md. A zero-dispatch placeholder
+    # bus-control logic only reads Generator.control, never StorageUnit.
+    # A zero-dispatch placeholder
     # Generator is added when the largest-capacity bus is storage-only, so
     # slack candidacy isn't silently restricted to plain-Generator buses.
     print("Assigning slack (largest total generation capacity bus)...")

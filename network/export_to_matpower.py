@@ -27,10 +27,6 @@ Generator reactive capability (Qmax/Qmin) isn't in the source data (no real
 generator Q-capability curves), but is a mandatory MATPOWER column. Uses a
 generic +-tan(acos(0.85)) * Pmax assumption -- not measured.
 
-See network/docs/DEBUGGING_HISTORY.md for issues found while building this
-export (per-unit base mismatch, missing shunt data, missing DC-seeded
-start).
-
 Usage
 -----
     python network/export_to_matpower.py --network networks/elec_solved.nc

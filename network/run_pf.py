@@ -13,9 +13,9 @@ reactance-only approximation as LOPF itself, so this should reproduce
 the LOPF line flows almost exactly. Requires a single slack bus per
 sub-network (see run_lopf_main_island.py's slack assignment).
 
-AC (--method pf): full nonlinear Newton-Raphson power flow, n.pf(). Four
+AC (--method pf): full nonlinear Newton-Raphson power flow, n.pf(). Five
 gaps are closed in prepare_for_ac_pf() (harmless no-ops for --method lpf,
-which ignores r, Q, and PV/PQ classification entirely):
+which ignores r, Q, shunts, and PV/PQ classification entirely):
 
 1. Transformer resistance: r = x / 30 (generic X/R, not measured -- r was
    0 in the source data).
@@ -25,10 +25,16 @@ which ignores r, Q, and PV/PQ classification entirely):
    generation-dominant bus is marked PV so PyPSA solves for Q there
    instead of holding it fixed. Storage-only buses get a zero-dispatch
    placeholder Generator so they're eligible too (PyPSA's bus-control
-   logic never reads StorageUnit.control). See network/docs/DEBUGGING_HISTORY.md
-   for why the eligibility thresholds are network-specific.
+   logic never reads StorageUnit.control). Eligibility thresholds are
+   network-specific -- see the PV-eligibility constants below.
 4. Voltage bounds: v_mag_pu_min/max set to a generic 0.95-1.05 pu
    (informational only -- n.pf() doesn't enforce these).
+5. Reactive compensation: one zero-real-power PQ generator per bus, whose
+   q_set tracks REACTIVE_COMPENSATION_RATIO of that bus's own reactive
+   demand *at every snapshot* (not a constant sized to the peak hour) --
+   an idealized continuously-variable compensator (e.g. an SVC), rather
+   than a fixed shunt bank that over-compensates off-peak. Override with
+   --reactive-compensation-ratio (0 disables).
 
 Usage
 -----
@@ -53,15 +59,20 @@ V_MAG_PU_MAX = 1.05
 
 # PV-eligibility thresholds: a bus qualifies if local generator capacity
 # >= PV_MIN_CAPACITY_MW and local load / local generation < PV_MAX_LOAD_RATIO.
-# The right values are topology-dependent (see network/docs/DEBUGGING_HISTORY.md) --
-# override via --pv-min-capacity / --pv-max-load-ratio per network. Defaults
-# below are tuned for elec_solved.nc; use 0 / 1 for elec_735kv.nc.
+# The right values are topology-dependent -- override via --pv-min-capacity /
+# --pv-max-load-ratio per network. Defaults below are tuned for
+# elec_solved.nc; use 0 / 1 for elec_735kv.nc.
 PV_MIN_CAPACITY_MW = 100.0
 PV_MAX_LOAD_RATIO = 0.10
 
+# Reactive compensation sizing: fraction of each bus's own reactive demand,
+# supplied at every snapshot (not just the peak hour).
+REACTIVE_COMPENSATION_RATIO = 0.70
+
 
 def prepare_for_ac_pf(n: pypsa.Network, pv_min_capacity: float = PV_MIN_CAPACITY_MW,
-                       pv_max_load_ratio: float = PV_MAX_LOAD_RATIO) -> None:
+                       pv_max_load_ratio: float = PV_MAX_LOAD_RATIO,
+                       reactive_compensation_ratio: float = REACTIVE_COMPENSATION_RATIO) -> None:
     print("\n--- Preparing for AC PF (no-op for DC/lpf) ---")
 
     n.transformers["r"] = n.transformers["x"] / TRANSFORMER_X_R_RATIO
@@ -124,6 +135,17 @@ def prepare_for_ac_pf(n: pypsa.Network, pv_min_capacity: float = PV_MIN_CAPACITY
     print(f"4. Set v_mag_pu bounds to [{V_MAG_PU_MIN}, {V_MAG_PU_MAX}] pu on all {len(n.buses)} buses "
           "(informational only -- n.pf() doesn't enforce these, but they're now there to check against)")
 
+    if reactive_compensation_ratio > 0:
+        q_by_bus_t = n.loads_t.q_set.T.groupby(n.loads.bus).sum().T.reindex(columns=n.buses.index, fill_value=0.0)
+        comp_names = n.buses.index + " reactive-compensation"
+        n.madd("Generator", comp_names, bus=n.buses.index, carrier="reactive_compensation",
+               p_nom=0.0, control="PQ")
+        q_by_bus_t.columns = comp_names
+        n.generators_t.q_set[comp_names] = reactive_compensation_ratio * q_by_bus_t
+        print(f"5. Added {len(n.buses)} reactive-compensation generators, q_set(t) = "
+              f"{reactive_compensation_ratio:.2f} * (that bus's own reactive demand at t) -- "
+              "tracks demand every snapshot instead of a fixed peak-sized shunt")
+
     # n.pf()'s single-bus sub-network handling needs a slack generator to exist
     # even for a trivial 1-bus sub-network. A p_nom=0 placeholder is inert
     # bookkeeping for a pure Link pass-through terminal with no Generator.
@@ -147,6 +169,9 @@ def main():
     parser.add_argument("--pv-max-load-ratio", type=float, default=PV_MAX_LOAD_RATIO,
                          help="Max local-load/local-generation ratio for a bus to be PV-eligible. "
                               "Use 1 for elec_735kv.nc.")
+    parser.add_argument("--reactive-compensation-ratio", type=float, default=REACTIVE_COMPENSATION_RATIO,
+                         help="Reactive compensation per bus, as a fraction of that bus's own "
+                              "reactive demand at each snapshot. 0 disables.")
     args = parser.parse_args()
 
     print(f"Loading solved network: {args.network}")
@@ -163,7 +188,8 @@ def main():
               f"slack_bus={n.sub_networks.at[sn,'slack_bus']}, slack generator(s)={slack_gens.tolist()}")
 
     if args.method == "pf":
-        prepare_for_ac_pf(n, pv_min_capacity=args.pv_min_capacity, pv_max_load_ratio=args.pv_max_load_ratio)
+        prepare_for_ac_pf(n, pv_min_capacity=args.pv_min_capacity, pv_max_load_ratio=args.pv_max_load_ratio,
+                           reactive_compensation_ratio=args.reactive_compensation_ratio)
 
     print(f"\nRunning {'DC (linearized)' if args.method=='lpf' else 'AC (nonlinear Newton-Raphson)'} "
           f"power flow over all {len(n.snapshots)} snapshots, using the LOPF-optimal dispatch as fixed injections...")

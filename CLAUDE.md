@@ -26,15 +26,14 @@ project without re-deriving everything from scratch.
      class resolution. This is the main working network: real dispatch is solved here (LOPF), and
      it's the level of detail AC PF would need to converge at for genuinely representative
      contingency analysis — which is exactly the network AC PF has never converged on (see below).
-  3. **735kV reduced** (`elec_735kv.nc`, 58 buses) — a further reduction down to just the
-     735/765kV backbone (`reduce_to_735kv.py`), aggregating everything else onto backbone buses by
-     graph shortest-path. Purpose-built for AC PF tractability: small and heavily-meshed enough
-     that full nonlinear convergence was actually achievable (168/168), which the 315kV network
-     never was. Trade-off: it's a coarser representation, so contingency results on it are a
-     stand-in for backbone-level stress, not a substitute for solving the real 315kV-detail network.
-- A full narrative debugging report (AC PF convergence specifically) is published here:
-  **https://claude.ai/code/artifact/aeb699d5-a8a3-4469-b8cd-edd9d6ebcc6b** — read that before
-  re-investigating anything AC-PF-related, it documents ~15 diagnosed issues and what was ruled out.
+  3. **735kV reduced** (`elec_735kv.nc`, 58 buses, 109 lines) — a further reduction down to just
+     the 735/765kV backbone (`reduce_to_735kv.py`), aggregating everything else onto backbone
+     buses by graph shortest-path. Purpose-built for AC PF tractability. At current real demand it
+     converges 50/168 snapshots, but a clean 168/168 at 85% of that demand — a genuine, well-tested
+     loadability-margin finding (see `network/docs/POWER_FLOW.md`).
+- Full documentation lives under `network/docs/` — read `POWER_FLOW.md` before re-investigating
+  anything AC-PF-related; it documents the full elimination history (what's been ruled out) and
+  the current best finding.
 
 ## Pipeline (in order, each stage's `.nc` output feeds the next)
 
@@ -72,11 +71,14 @@ project without re-deriving everything from scratch.
    → produces `elec_solved.nc`, **the current best network** (0% shed, demand within 0.2% of real
    HQ data for the window solved). Currently solved for a 1-week window (168 snapshots,
    2022-01-01 to 2022-01-07); can be re-run with `--snapshots N` for other windows.
-   - **Slack assignment** (fixed 2026-09-02): picks the bus with the largest TOTAL generation
-     capacity (Generator + StorageUnit combined), not just the largest plain-Generator bus. Storage
-     -only buses (PyPSA's `find_bus_controls()` never reads `StorageUnit.control`, confirmed from
-     source) get a zero-dispatch placeholder Generator added so they can actually host the slack
-     flag. Currently lands on bus 339 (La Grande-2-A + Robert-Bourassa, 7,722 MW).
+   - **Slack assignment**: picks the bus with the largest TOTAL generation capacity (Generator +
+     StorageUnit combined), not just the largest plain-Generator bus. Storage-only buses (PyPSA's
+     `find_bus_controls()` never reads `StorageUnit.control`, confirmed from source) get a
+     zero-dispatch placeholder Generator added so they can actually host the slack flag.
+     `reduce_to_735kv.py` defaults to whichever bus this lands on (currently `340 AC`, the
+     Churchill Falls tie), but the 735kV AC PF work in this project has consistently used
+     `114 ror` as slack instead (set manually after reduction) — a real generator, not a
+     placeholder.
 4. **`run_pf.py`** — runs DC (`--method lpf`) or full AC (`--method pf`) power flow on a solved
    network, using its dispatch as fixed injections. DC PF has been clean throughout this whole
    project on every network tried. AC PF has been the hard problem — see the report. Key things
@@ -92,10 +94,9 @@ project without re-deriving everything from scratch.
    loads/generators/storage from non-backbone buses onto the nearest backbone bus via graph
    shortest-path (real line length — NOT the straight-line method `reduce_voltage_network.py`
    uses). Preserves actual solved dispatch rather than re-deriving a ceiling; the reduced network
-   is never re-optimized. → produces `elec_735kv.nc`.
-   - **⚠️ STALE as of 2026-09-03**: this was last run before the slack-assignment fix in step 3.
-     `elec_735kv.nc`'s slack is still the old `114 ror` (4,042 MW), not the corrected `339`-based
-     one. Re-run this against the current `elec_solved.nc` before trusting any 735kV AC PF result.
+   is never re-optimized. → produces `elec_735kv.nc`. Slack defaults to whichever bus has the
+   largest total generation capacity; set to `114 ror` manually afterward for AC PF work (see
+   step 3's slack note above).
 6. **`export_to_matpower.py`** — exports a solved network to MATPOWER `.m` case format for an
    independent AC PF cross-check, writing to both `network/` and
    `C:\Users\hjgua\Documents\MATLAB\matpower8.1\data\`. Handles PyPSA's split per-unit conventions
@@ -107,29 +108,24 @@ project without re-deriving everything from scratch.
    full raw network, LOPF+DCPF congestion/dispatch/shedding, AC-PF-specific results (voltage
    magnitude/angle, diverging color scale), and a zoomed view of the most-congested lines.
 
-## Current state / open threads (as of 2026-09-03)
+## Current state / open threads (as of 2026-09-17)
 
-- **735kV backbone**: converged 168/168 in PyPSA's own AC PF (`n.pf()`) as of the last consistent
-  run — but that result predates the slack fix (see step 5 above) and needs re-verifying.
-  Required 3 real fixes (near-singular bridge-line reactance, storage-PV-eligibility gap, widened
-  PV bus thresholds) + shunt capacitors (fixed/unswitched, 70% of local peak reactive demand) to
-  reach full convergence without weakening the generator reactive-capability assumption.
-- **315kV full network**: AC PF has **never converged**, 0/168 in every configuration tried
-  (conservative and widened PV thresholds, before and after the slack fix, with and without the
-  7 DC-link-connected island buses removed). Root cause **not found** — this is the biggest open
-  problem. See report §03/§05 for what's been ruled out.
-- **MATPOWER cross-check**: exported the 735kV network and it does NOT converge in MATPOWER's
-  `runpf()`, despite the export being verified numerically exact against PyPSA (branch data,
-  shunt scaling, DC-PF-seeded start, individual branch flows all matched to the decimal in a
-  direct DC PF comparison). Seven independent hypotheses tested and ruled out (see report). Current
-  read: a genuine algorithmic robustness difference between PyPSA's and MATPOWER's specific
-  Newton-Raphson implementations on this data, not a data/export bug. Untested next step: try
-  MATPOWER's fast-decoupled (`FDXB`) or cartesian-coordinate (`NR-SC`) algorithm variants.
-- **Stale/diagnostic files in `networks/`** worth cleaning up once the 735kV re-run above is done:
-  `elec_solved_lpf.nc`, `elec_solved_pf.nc` (predate the slack fix), `elec_735kv*.nc` (stale, see
-  above), `elec_solved_noislands*.nc` (diagnostic — DC-link-island removal, ruled out as a cause,
-  conclusion already extracted), `elec_735kv_pf_bcapped.nc` (diagnostic — line-charging cap test,
-  ruled out as a cause).
+- **735kV backbone** (`elec_735kv.nc`, 109 real lines): 50/168 at current real demand (32,421 MW
+  mean, calibrated against real whole-January-2022 HQ data), **168/168 at 85% of that demand**.
+  An extensive elimination process (reactive compensation, single/combined/all-lines
+  reinforcement, continuation power flow, single-PV-bus removal, modal/eigenvector analysis) ruled
+  out every localized fix — only reducing total real+reactive power everywhere works, meaning the
+  constraint is systemic, not one fixable component. A likely contributing (not yet confirmed
+  sole) cause: `reduce_voltage_network.py`'s straight-line reassignment pools real demand from up
+  to 281.6km away onto the network's one electrically weak 735/765kV bridge corridor. See
+  `network/docs/POWER_FLOW.md` for the full investigation.
+- **315kV full network** (`elec_solved.nc`, 208 buses): 0/168, and unlike the 735kV network,
+  **demand reduction doesn't help at all** (still 0/168 at 85% demand, with far more extreme
+  numerical blowup). This is a structurally different, still-undiagnosed problem — the biggest
+  open question in the project.
+- **MATPOWER cross-check**: an earlier exported network did NOT converge in MATPOWER's `runpf()`,
+  despite a numerically-exact export (DC PF branch flows matched PyPSA to the decimal). Seven
+  hypotheses tested and ruled out. Not re-attempted against the current 109-line network.
 
 ## Working conventions established in this project
 
@@ -137,8 +133,9 @@ project without re-deriving everything from scratch.
   point it's introduced, with the reasoning for the specific value chosen — follow this pattern,
   don't silently add new placeholder assumptions.
 - Prefer graph shortest-path (real line length) over straight-line geographic distance for any
-  bus-reassignment logic — the straight-line method has caused two confirmed real misassignment
-  bugs in this project already.
+  bus-reassignment logic — the straight-line method has caused multiple confirmed real
+  misassignment bugs in this project already, most recently pooling demand from up to 281.6km
+  away onto one bus on the 735kV network's weakest corridor.
 - When adding a workaround for a PyPSA API gap (e.g., `StorageUnit` never being PV-eligible), use
   a zero-dispatch placeholder `Generator` rather than trying to patch PyPSA itself — this pattern
   is used in three places now (`run_pf.py`'s PV eligibility, `run_lopf_main_island.py`'s slack

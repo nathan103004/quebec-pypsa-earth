@@ -150,25 +150,83 @@ Full timeline, in order:
     power / angle stress (DC-seeded angle spread averaged 117 deg on failed
     snapshots vs. 95 deg on converged ones) was identified as a second,
     independent contributing factor.
-11. Comparing the regenerated network against a recovered pre-regeneration
-    copy (`elec_735kv_pf_bcapped.nc`, saved during step 9's diagnostics)
-    found 4 corridors with fewer real parallel circuits in the new build
-    (6 fewer lines total: 115 -> 109), concentrated at the two most
-    electrically stressed buses in the network. Checking against
-    `elec_full.nc` (the unchanged raw source) showed the *old* network's
-    higher circuit counts didn't match the real source data either --
-    they came from an upstream process (likely `fix_parallel_circuits_v2.py`,
-    whose own source data files no longer exist in the repo) that was never
-    actually reflected in the current `elec_full.nc`. The recovered 168/168
-    network is real and reproducible, but its convergence is partly
-    supported by non-real transmission capacity at exactly its two most
-    stressed nodes. This tension (accurate-but-non-convergent vs.
-    convergent-but-partly-fabricated) is unresolved.
+11. Checked a set of corridors with fewer real parallel circuits in the
+    regenerated network than an earlier build had, concentrated at the two
+    most electrically stressed buses in the network. Verified directly
+    against OSM's own relation data (not just `elec_full.nc`): named line
+    ways matching each disputed corridor's real endpoint-to-endpoint
+    distance give real circuit counts of 1, 1, 1, 2 -- confirming the
+    regenerated network's (lower) circuit counts are the accurate ones, and
+    that an earlier build's higher counts at those corridors were not
+    supported by any real source data.
+12. Replaced the fixed (peak-sized) shunt capacitors with a demand-following
+    model: a zero-real-power PQ generator per bus, `q_set` tracking
+    `0.70 * that bus's own reactive demand` at every snapshot instead of a
+    constant sized to the week's peak hour. On the real 109-line network:
+    91/168 (fixed shunt) -> 97/168 (demand-following) -- a real but modest
+    improvement, confirming the constant-sizing critique but not closing
+    the gap.
+13. Tried PV/PQ switching with realistic Q limits (the standard
+    MATPOWER/PSS-E `enforce_q_lims` algorithm: cap each PV generator's
+    solved Q at its nameplate capability, converting to PQ and re-solving
+    when violated): 44/168, *worse* than unlimited PV. Confirms the
+    earlier "widened PV eligibility" win (step 4 above) was partly an
+    artifact of giving those buses unlimited (unrealistic) reactive
+    capability -- reverted, not adopted.
+14. Systematic root-cause isolation on the real 109-line network, each
+    tested directly against the snapshots failing at full demand (71 of
+    168 with the demand-following recipe):
+    - 10x local reactive compensation at every bus: 1/71 fixed --
+      rules out "insufficient local Q supply" as the mechanism.
+    - Strengthening the single most-correlated corridor (114-148, 2x
+      capacity): 0/71. Top-3 and top-6 most-loaded corridors: 0/71.
+    - Doubling capacity on **all 109 lines network-wide**: 0/71 -- rules
+      out network-wide transmission strength/impedance as the mechanism,
+      at any scale tested.
+    - Continuation power flow (85%->90%->95%->100% demand, each step
+      warm-started from the previous converged AC solution): 0/71 --
+      rules out a bad Newton-Raphson starting guess; a real, nearby AC
+      solution not being found isn't the issue, since even the best
+      possible nearby seed still fails at 100%.
+    - Removing any single PV bus's voltage-holding constraint (one at a
+      time, re-solving): 0/71 -- rules out one specific bus being locally
+      infeasible.
+    - Modal analysis of the power-flow Jacobian (SVD at a near-failure
+      operating point, following the standard voltage-stability technique):
+      consistently identifies the same critical bus cluster across every
+      tested snapshot -- buses 3554, 133, 132, 1081, 136, 195, 603, 1717
+      (the 735/765kV bridge transformer area, `bridge_132_133`/`133-3554`,
+      extending through `136-1081` to the Montréal-area buses). All
+      critical components are voltage *angle*, not magnitude -- a
+      real-power/synchronization phenomenon, not reactive. Strengthening
+      exactly this cluster (2x capacity): still 0/71 -- reinforcing the
+      top-ranked weak point just promotes a different combination to
+      become critical instead (a network with several comparably-weak
+      modes, not one dominant fixable one).
+    - Only a uniform reduction of real+reactive power at every bus
+      simultaneously works: 71/71 at 85% of full demand. Confirmed at full
+      network scale: 168/168 across all 168 snapshots at 85% demand.
+15. A likely contributing (not yet confirmed sole) cause: the critical
+    cluster's local demand comes **entirely from reassignment**, not
+    native load (zero native demand at buses 3554/136/1081 in
+    `elec_full.nc`). `reduce_voltage_network.py`'s known straight-line-
+    nearest-neighbor flaw pools 28 loads onto bus 3554 from as far as
+    281.6km away (1,482 MW total) and 21 loads onto bus 1081 from up to
+    87.9km away (1,084 MW) -- real substations that almost certainly
+    connect to closer backbone buses via the real grid. Not yet fixed.
+16. The same 85%-demand test on the 315kV network (`elec_solved.nc`, 208
+    buses): 0/168, **no improvement at all**, with far more extreme
+    numerical blowup than the 735kV case (273/276 lines "loaded" past
+    absurd percentages). The 315kV network's failure is not a loadability-
+    margin problem like the 735kV case -- it's something structurally
+    different, and it has not been diagnosed.
 
-**Current state**: `elec_735kv_pf.nc` holds the recovered 168/168 network
-(115 lines, includes the non-real extra circuits above). A freshly-rebuilt,
-fully-accurate version of the same network converges 71/168 with the same
-recipe. Neither is a clean final answer.
+**Current state**: neither reduced network fully converges at current real
+demand. The 735kV network (`elec_735kv.nc`, 109 real lines) converges
+50/168 at full demand and a clean 168/168 at 85% of it -- a genuine,
+well-tested loadability-margin finding, with a plausible (not yet fixed)
+data-quality contributor. The 315kV network (`elec_solved.nc`) converges
+0/168 regardless of demand scale, by a different and undiagnosed mechanism.
 
 ## `export_to_matpower.py`
 

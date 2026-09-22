@@ -61,3 +61,5 @@ convergence.
 convergence using entirely real topology and real circuit data (no fabricated lines). It confirms
 the current 735kV network's AC PF failure at 100% demand is demand-level-sensitive, though the
 underlying mechanism is still not identified -- see [POWER_FLOW.md](POWER_FLOW.md).
+
+![735kV backbone AC PF results at 85% demand -- voltage deviation, line loading, slack/PV buses](../quebec_735kv_ac_pf_map.png)

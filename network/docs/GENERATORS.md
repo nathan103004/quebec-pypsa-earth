@@ -18,7 +18,7 @@ load at a heavy cost penalty instead of failing to solve, and their dispatch is 
 report unserved load (currently 0% on the solved network).
 
 Churchill Falls' real 5,428 MW is included in the hydro storage total above (`465
-hydro-Churchill-Falls`, at bus `465-735kv`, added by `add_churchill_falls_tie.py`)。
+hydro-Churchill-Falls`, at bus `465-735kv`, added by `add_churchill_falls_tie.py`).
 
 ## Dispatch ceilings
 

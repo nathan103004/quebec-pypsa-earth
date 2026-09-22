@@ -18,8 +18,7 @@ clean throughout this project on every network tried -- no convergence issues at
 
 ## AC power flow (full nonlinear Newton-Raphson) -- open, unresolved
 
-**Neither reduced network fully converges under AC PF at current real demand.** This is an open
-investigation, not a solved problem. Current state:
+**Neither reduced network fully converges under AC PF at current real demand.** Current state:
 
 | Network | Convergence at current demand | At 85% of current demand |
 |---|---|---|
@@ -28,36 +27,16 @@ investigation, not a solved problem. Current state:
 
 ### What's been ruled out on the 735kV network
 
-An extensive series of interventions, each tested directly against the real 109-line network at
-full demand, all failed to meaningfully improve convergence:
+Several fixes attemped but all failed to meaningfully improve convergence:
 
 - 10x local reactive compensation at every bus: 1/71 (of the snapshots that fail at baseline)
 - Strengthening any single stressed corridor, or the top 3/6 most-loaded corridors (2x capacity): 0/71
 - Doubling capacity on **all 109 lines network-wide**: 0/71
-- Continuation power flow, warm-started from a converged 95%-demand solution: 0/71
-- Removing any single PV bus's voltage-holding constraint: 0/71
 - Modal (eigenvector) analysis consistently identifies the same critical bus cluster (132, 133,
   3554, 136, 1081, 195, 603, 1717 -- the 735/765kV bridge area) across every tested snapshot, but
-  strengthening exactly that cluster: 0/71
+  increasing loading capacity of the lines connected to the exact bus yielded no meaningful result: 0/71
 
-Only a uniform reduction of real+reactive power at every bus simultaneously works (71/71 of the
-previously-failing snapshots, then confirmed as 168/168 across the full network at 85% scale).
-This pattern -- nothing localized helps, only reducing total system loading helps -- means the
-constraint is systemic (the aggregate real+reactive injection pattern relative to the network's
-whole impedance structure), not attributable to one fixable line, bus, or generator.
-
-### A likely contributing cause: data quality, not physics
-
-The critical bus cluster's local demand comes **entirely from reassignment**, not native load
-(zero native demand at buses 3554/136/1081 in `elec_full.nc`). Tracing the reassignment:
-`reduce_voltage_network.py`'s known straight-line-nearest-neighbor flaw (already documented as
-causing a 257km misassignment elsewhere) pools **28 loads onto bus 3554 from as far as 281.6km
-away** (1,482 MW total), and 21 loads onto bus 1081 from up to 87.9km away (1,084 MW). In reality
-those substations almost certainly connect to closer backbone buses via the real grid, not through
-this one thin bridge node. This looks like a real data-quality artifact concentrating demand on
-the network's one electrically weak corridor -- not yet fixed (the fix, graph-distance
-reassignment, already exists as a pattern in `reduce_to_735kv.py` but hasn't been retrofitted into
-`reduce_voltage_network.py`).
+Only a uniform reduction of real+reactive power at every bus simultaneously works; Confirmed as 168/168 across the full network at 85% scale).
 
 ### The 315kV network fails differently
 

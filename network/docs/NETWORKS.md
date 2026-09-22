@@ -13,6 +13,8 @@ Since we are only interested in the Quebec network, the
 `reduce_voltage_network.py` is created to extract the quebec grid. Can be visualized by running
 (`visualize_real_network_map.py`).
 
+![Unreduced Quebec-region network -- voltage levels, substations, loads, generators](../quebec_real_network_map.png)
+
 ## 2. 315kV reduced (`elec_reduced.nc` -> `elec_solved.nc`)
 
 208 buses, 276 lines, 23 transformers, 7 links, 65 real generators, 18 storage units, 729 loads.
@@ -30,6 +32,8 @@ contingency analysis. It does not: **0/168** under full nonlinear AC PF, and unl
 network below, reducing demand doesn't help either (still 0/168 at 85% of current demand) -- its
 failure mode is structurally different and not yet understood. See
 [POWER_FLOW.md](POWER_FLOW.md).
+
+![315kV reduced network -- LOPF congestion, load, shedding, and hydro dispatch](../quebec_reduced_network_map.png)
 
 ## 3. 735kV backbone (`elec_735kv.nc`)
 

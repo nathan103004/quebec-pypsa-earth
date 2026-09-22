@@ -37,7 +37,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 NETWORK_DIR = os.path.dirname(os.path.abspath(__file__))
 GADM_PATH = os.path.join(BASE_DIR, "data", "gadm", "gadm41_CAN", "gadm41_CAN.gpkg")
 
-DEFAULT_NETWORK = os.path.join(BASE_DIR, "networks", "elec_full.nc")
+DEFAULT_NETWORK = os.path.join(NETWORK_DIR, "networks_current", "elec_full.nc")
 DEFAULT_OUTPUT = os.path.join(NETWORK_DIR, "quebec_real_network_map.html")
 
 # "465-735kv" after add_churchill_falls_tie.py (the real 735 kV yard); falls
@@ -73,38 +73,10 @@ def get_display_polygon():
     return geom
 
 
-def zoom_center_for_bounds(lons, lats, width_px=1600, height_px=1200, margin=1.25):
-    """Mapbox zoom/center that tightly fits the given points (standard
-    Web-Mercator fitBounds formula) -- much more accurate than a rough
-    span-based guess, which was leaving the view zoomed out to show all
-    of eastern North America instead of just Quebec."""
-    min_lon, max_lon = float(lons.min()), float(lons.max())
-    min_lat, max_lat = float(lats.min()), float(lats.max())
-    center = {"lon": (min_lon + max_lon) / 2, "lat": (min_lat + max_lat) / 2}
-
-    def lat_rad(lat):
-        s = np.sin(np.radians(lat))
-        return np.log((1 + s) / (1 - s)) / 2
-
-    lat_fraction = (lat_rad(max_lat) - lat_rad(min_lat)) / np.pi
-    lon_diff = max_lon - min_lon
-    lon_fraction = ((lon_diff + 360) if lon_diff < 0 else lon_diff) / 360
-
-    def zoom_level(px, fraction):
-        return np.log2(px / 512 / fraction) if fraction > 0 else 21.0
-
-    zoom = min(zoom_level(height_px, lat_fraction), zoom_level(width_px, lon_fraction), 21.0)
-    zoom -= np.log2(margin)
-    return float(np.clip(zoom, 2.0, 12.0)), center
-
-
 def exact_map_bounds(lons, lats, margin_pct: float = 0.05) -> dict:
-    """Exact fitBounds box (west/east/south/north) with a flat percentage
-    margin added on each side -- passed straight to `layout.mapbox.bounds`,
-    which makes Mapbox/Maplibre compute the precise zoom/center itself.
-    Unlike zoom_center_for_bounds() (a manual zoom-level approximation
-    clipped to max zoom 12, which stopped fitting tightly for small
-    extents), this has no clipping and always fits exactly."""
+    """Exact bounding box (west/east/south/north) with a flat percentage
+    margin added on each side, fed into geo_layout_from_bounds() below to
+    set layout.geo's lataxis/lonaxis range."""
     min_lon, max_lon = float(lons.min()), float(lons.max())
     min_lat, max_lat = float(lats.min()), float(lats.max())
     lon_pad = (max_lon - min_lon) * margin_pct or 0.01
@@ -113,6 +85,26 @@ def exact_map_bounds(lons, lats, margin_pct: float = 0.05) -> dict:
         "west": min_lon - lon_pad, "east": max_lon + lon_pad,
         "south": min_lat - lat_pad, "north": max_lat + lat_pad,
     }
+
+
+def geo_layout_from_bounds(bounds: dict, resolution: int = 50) -> dict:
+    """layout.geo config that fits `bounds`, drawn from Plotly's built-in
+    Natural Earth vector basemap (land/country/state borders) instead of
+    external raster tiles -- no tile server or API key involved, so it
+    can't be broken by an outside provider the way OSM (tile-usage policy
+    block) and Carto (API-key wall) both were."""
+    return dict(
+        resolution=resolution,
+        scope="north america",
+        showland=True, landcolor="#f5f5f0",
+        showcountries=True, countrycolor="#999999",
+        showsubunits=True, subunitcolor="#bbbbbb",
+        showlakes=True, lakecolor="#dceaf5",
+        lataxis=dict(range=[bounds["south"], bounds["north"]]),
+        lonaxis=dict(range=[bounds["west"], bounds["east"]]),
+        projection_type="mercator",
+        bgcolor="white",
+    )
 
 
 def marker_size(values: pd.Series, min_size: float = 4.0, max_size: float = 22.0) -> list:
@@ -188,7 +180,7 @@ def main():
             lons.extend([b0.x, b1.x, None])
             lats.extend([b0.y, b1.y, None])
         fig.add_trace(
-            go.Scattermapbox(
+            go.Scattergeo(
                 lat=lats, lon=lons, mode="lines",
                 line=dict(width=width, color=color),
                 opacity=0.85,
@@ -202,7 +194,7 @@ def main():
     n_lines_per_bus = pd.concat([lines.bus0, lines.bus1]).value_counts()
     sizes = region_bus_df.index.map(lambda b: 3 + min(n_lines_per_bus.get(b, 0), 10)).to_numpy()
     fig.add_trace(
-        go.Scattermapbox(
+        go.Scattergeo(
             lat=region_bus_df.y, lon=region_bus_df.x,
             mode="markers",
             marker=dict(size=sizes, color="#333333", opacity=0.6),
@@ -220,7 +212,7 @@ def main():
     region_loads["x"] = region_loads.bus.map(n.buses.x)
     region_loads["y"] = region_loads.bus.map(n.buses.y)
     fig.add_trace(
-        go.Scattermapbox(
+        go.Scattergeo(
             lat=region_loads.y, lon=region_loads.x,
             mode="markers",
             marker=dict(size=marker_size(region_loads["mean_mw"], 4, 18), color="#9467bd", opacity=0.55),
@@ -249,7 +241,7 @@ def main():
     for carrier, grp in all_gen.groupby("carrier"):
         style = CARRIER_STYLE.get(carrier, dict(color="black", symbol="circle", label=carrier))
         fig.add_trace(
-            go.Scattermapbox(
+            go.Scattergeo(
                 lat=grp.y, lon=grp.x,
                 mode="markers+text",
                 marker=dict(size=grp["marker_size"].tolist(), color=style["color"], opacity=0.9),
@@ -269,10 +261,10 @@ def main():
     # the full extent already, from Quebec's US border down south to
     # Churchill Falls up north/east) -- this crops out the rest of eastern
     # North America instead of showing Toronto/New York for context.
-    zoom, center = zoom_center_for_bounds(region_bus_df.x, region_bus_df.y, width_px=1600, height_px=1200)
+    bounds = exact_map_bounds(region_bus_df.x, region_bus_df.y, margin_pct=0.05)
 
     fig.update_layout(
-        mapbox=dict(style="open-street-map", zoom=zoom, center=center),
+        geo=geo_layout_from_bounds(bounds),
         margin=dict(l=0, r=0, t=50, b=0),
         title="Quebec real-generator network -- voltage levels, substations, loads & generators",
         legend=dict(bgcolor="rgba(255,255,255,0.85)", font=dict(size=10)),
@@ -283,6 +275,9 @@ def main():
     os.makedirs(os.path.dirname(args.output), exist_ok=True)
     fig.write_html(args.output)
     print(f"\nMap written to {args.output}")
+    png_path = os.path.splitext(args.output)[0] + ".png"
+    fig.write_image(png_path, scale=2)
+    print(f"Static image written to {png_path}")
 
 
 if __name__ == "__main__":

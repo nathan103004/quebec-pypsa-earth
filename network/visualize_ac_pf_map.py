@@ -38,10 +38,11 @@ BASE_DIR = os.path.dirname(NETWORK_DIR)
 sys.path.insert(0, NETWORK_DIR)
 from visualize_real_network_map import (  # noqa: E402
     exact_map_bounds,
+    geo_layout_from_bounds,
     marker_size,
 )
 
-DEFAULT_NETWORK = os.path.join(BASE_DIR, "networks", "elec_735kv_pf.nc")
+DEFAULT_NETWORK = os.path.join(NETWORK_DIR, "networks_current", "elec_735kv_scaled85_pf.nc")
 DEFAULT_OUTPUT = os.path.join(NETWORK_DIR, "quebec_735kv_ac_pf_map.html")
 
 CONGESTION_BUCKETS = [
@@ -83,7 +84,7 @@ def main():
             lons.extend([b0.x, b1.x, None])
             lats.extend([b0.y, b1.y, None])
         fig.add_trace(
-            go.Scattermapbox(
+            go.Scattergeo(
                 lat=lats, lon=lons, mode="lines",
                 line=dict(width=2.0 if hi <= 0.95 else 3.2, color=color),
                 opacity=0.85,
@@ -114,7 +115,7 @@ def main():
 
     max_abs_dev = max(worst_dev.abs().max(), 0.01)
     fig.add_trace(
-        go.Scattermapbox(
+        go.Scattergeo(
             lat=n.buses.y, lon=n.buses.x,
             mode="markers",
             marker=dict(
@@ -143,7 +144,7 @@ def main():
     # --- Slack/PV buses: labeled directly -- voltage there is a held setpoint, not a free result ---
     labeled = bus_type[bus_type != "PQ"]
     fig.add_trace(
-        go.Scattermapbox(
+        go.Scattergeo(
             lat=labeled.index.map(n.buses.y), lon=labeled.index.map(n.buses.x),
             mode="text",
             text=[("SLACK" if t == "Slack" else "PV") for t in labeled],
@@ -161,7 +162,7 @@ def main():
         if len(b_mvar):
             sbus = n.shunt_impedances.loc[b_mvar.index, "bus"]
             fig.add_trace(
-                go.Scattermapbox(
+                go.Scattergeo(
                     lat=sbus.map(n.buses.y), lon=sbus.map(n.buses.x),
                     mode="markers",
                     marker=dict(size=marker_size(b_mvar, 4, 16), color="#17becf", symbol="circle", opacity=0.7),
@@ -176,12 +177,12 @@ def main():
     converged_frac = 1.0  # this file only exists if n.pf() was run; convergence is asserted upstream
 
     fig.update_layout(
-        mapbox=dict(style="open-street-map", bounds=bounds),
+        geo=geo_layout_from_bounds(bounds),
         margin=dict(l=0, r=0, t=90, b=0),
         title=(
             "Quebec 735kV backbone -- AC power flow results (Newton-Raphson)"
-            f"<br><sub>{n_out_of_band}/{len(n.buses)} buses ever outside [{V_BAND_MIN},{V_BAND_MAX}] pu &middot; "
-            "bus color = worst voltage deviation from 1.0pu &middot; line color = max AC PF loading</sub>"
+            f"<br><sub>{n_out_of_band}/{len(n.buses)} buses ever outside [{V_BAND_MIN},{V_BAND_MAX}] pu · "
+            "bus color = worst voltage deviation from 1.0pu · line color = max AC PF loading</sub>"
         ),
         legend=dict(bgcolor="rgba(255,255,255,0.85)", font=dict(size=10)),
         width=1600,
@@ -191,6 +192,9 @@ def main():
     os.makedirs(os.path.dirname(args.output), exist_ok=True)
     fig.write_html(args.output)
     print(f"\nMap written to {args.output}")
+    png_path = os.path.splitext(args.output)[0] + ".png"
+    fig.write_image(png_path, scale=2)
+    print(f"Static image written to {png_path}")
 
 
 if __name__ == "__main__":

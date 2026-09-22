@@ -42,11 +42,12 @@ BASE_DIR = os.path.dirname(NETWORK_DIR)
 sys.path.insert(0, NETWORK_DIR)
 from visualize_real_network_map import (  # noqa: E402
     exact_map_bounds,
+    geo_layout_from_bounds,
     marker_size,
     jitter_colocated,
 )
 
-DEFAULT_NETWORK = os.path.join(BASE_DIR, "networks", "elec_solved.nc")
+DEFAULT_NETWORK = os.path.join(NETWORK_DIR, "networks_current", "elec_solved.nc")
 DEFAULT_OUTPUT = os.path.join(NETWORK_DIR, "quebec_reduced_network_map.html")
 
 CONGESTION_BUCKETS = [
@@ -101,7 +102,7 @@ def main():
                 lats.extend([b0.y, b1.y, None])
             width = 2.0 if hi <= 0.95 else 3.2
             fig.add_trace(
-                go.Scattermapbox(
+                go.Scattergeo(
                     lat=lats, lon=lons, mode="lines",
                     line=dict(width=width, color=color),
                     opacity=0.85,
@@ -117,7 +118,7 @@ def main():
     n_lines_per_bus = pd.concat([n.lines.bus0, n.lines.bus1]).value_counts()
     sizes = n.buses.index.map(lambda b: 3 + min(n_lines_per_bus.get(b, 0), 10)).to_numpy()
     fig.add_trace(
-        go.Scattermapbox(
+        go.Scattergeo(
             lat=n.buses.y, lon=n.buses.x,
             mode="markers",
             marker=dict(size=sizes, color="#333333", opacity=0.35),
@@ -133,7 +134,7 @@ def main():
     load_x = mean_load_by_bus.index.map(n.buses.x)
     load_y = mean_load_by_bus.index.map(n.buses.y)
     fig.add_trace(
-        go.Scattermapbox(
+        go.Scattergeo(
             lat=load_y, lon=load_x,
             mode="markers",
             marker=dict(size=marker_size(mean_load_by_bus, 4, 20), color="#9467bd", opacity=0.55),
@@ -155,7 +156,7 @@ def main():
         shed_x = shed_by_bus.index.map(n.buses.x)
         shed_y = shed_by_bus.index.map(n.buses.y)
         fig.add_trace(
-            go.Scattermapbox(
+            go.Scattergeo(
                 lat=shed_y, lon=shed_x,
                 mode="markers",
                 marker=dict(
@@ -192,7 +193,7 @@ def main():
         df = jitter_colocated(df)
         style = HYDRO_STYLE[carrier]
         fig.add_trace(
-            go.Scattermapbox(
+            go.Scattergeo(
                 lat=df.y, lon=df.x,
                 mode="markers+text",
                 marker=dict(size=marker_size(df["mean_dispatch"], 4, 26), color=style["color"], opacity=0.9),
@@ -226,7 +227,7 @@ def main():
     dcpf_vis = [False] * n_bucket + [True] * n_bucket + [True] * n_other
 
     fig.update_layout(
-        mapbox=dict(style="open-street-map", bounds=bounds),
+        geo=geo_layout_from_bounds(bounds),
         margin=dict(l=0, r=0, t=90, b=0),
         title=(
             "Quebec main-island network -- congestion, load, shedding &amp; hydro dispatch"
@@ -252,6 +253,9 @@ def main():
     os.makedirs(os.path.dirname(args.output), exist_ok=True)
     fig.write_html(args.output)
     print(f"\nMap written to {args.output}")
+    png_path = os.path.splitext(args.output)[0] + ".png"
+    fig.write_image(png_path, scale=2)
+    print(f"Static image written to {png_path}")
 
 
 if __name__ == "__main__":

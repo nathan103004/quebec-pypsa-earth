@@ -22,9 +22,9 @@ import pypsa
 NETWORK_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.dirname(NETWORK_DIR)
 sys.path.insert(0, NETWORK_DIR)
-from visualize_real_network_map import exact_map_bounds  # noqa: E402
+from visualize_real_network_map import exact_map_bounds, geo_layout_from_bounds  # noqa: E402
 
-DEFAULT_NETWORK = os.path.join(BASE_DIR, "networks", "elec_solved.nc")
+DEFAULT_NETWORK = os.path.join(NETWORK_DIR, "networks_current", "elec_solved.nc")
 DEFAULT_OUTPUT = os.path.join(NETWORK_DIR, "congestion_zoom_map.html")
 LOADING_THRESHOLD = 0.9
 
@@ -75,7 +75,7 @@ def main():
             lons.extend([b0.x, b1.x, None])
             lats.extend([b0.y, b1.y, None])
         width = 3.0 if hi <= 0.95 else 5.0
-        fig.add_trace(go.Scattermapbox(
+        fig.add_trace(go.Scattergeo(
             lat=lats, lon=lons, mode="lines",
             line=dict(width=width, color=color), opacity=0.9,
             name=f"{label} ({len(grp)} lines)",
@@ -87,7 +87,7 @@ def main():
     # Transformers, drawn as dashed lines
     for t, row in n.transformers.loc[context_trafos].iterrows():
         b0, b1 = n.buses.loc[row.bus0], n.buses.loc[row.bus1]
-        fig.add_trace(go.Scattermapbox(
+        fig.add_trace(go.Scattergeo(
             lat=[b0.y, b1.y], lon=[b0.x, b1.x], mode="lines",
             line=dict(width=2.5, color="#6a3d9a"), opacity=0.8,
             name=f"Transformer {t}" if t == context_trafos[0] else None,
@@ -103,7 +103,7 @@ def main():
         load_ids = n.loads.index[n.loads.bus == b]
         load_mw = n.loads_t.p_set[load_ids].mean().sum() if len(load_ids) else 0.0
         highlight = b in hot_buses
-        fig.add_trace(go.Scattermapbox(
+        fig.add_trace(go.Scattergeo(
             lat=[row.y], lon=[row.x], mode="markers+text",
             marker=dict(size=16 if highlight else 9, color="#c1272d" if highlight else "#333333", opacity=0.9),
             text=[f"{b}"], textposition="top right", textfont=dict(size=11 if highlight else 9),
@@ -121,7 +121,7 @@ def main():
     bounds = exact_map_bounds(pd.Series(all_lons), pd.Series(all_lats), margin_pct=0.15)
 
     fig.update_layout(
-        mapbox=dict(style="open-street-map", bounds=bounds),
+        geo=geo_layout_from_bounds(bounds),
         margin=dict(l=0, r=0, t=60, b=0), width=1200, height=1000,
         title=f"Congestion close-up: {', '.join(hot_lines)} (>= {args.threshold:.0%} loaded) and 1-hop neighborhood",
         legend=dict(bgcolor="rgba(255,255,255,0.9)", font=dict(size=10)),
@@ -129,6 +129,9 @@ def main():
 
     fig.write_html(args.output)
     print(f"Map written to {args.output}")
+    png_path = os.path.splitext(args.output)[0] + ".png"
+    fig.write_image(png_path, scale=2)
+    print(f"Static image written to {png_path}")
 
 
 if __name__ == "__main__":

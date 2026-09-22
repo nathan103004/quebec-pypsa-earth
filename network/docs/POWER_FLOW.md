@@ -11,6 +11,8 @@ Solved on the main 315kV working network's largest island (208 buses) over a one
 - Max line loading ~96% -- security margin (`s_max_pu`) is relaxed from PyPSA-Earth's default 0.7
   to 1.0; see [ASSUMPTIONS_AND_LIMITATIONS.md](ASSUMPTIONS_AND_LIMITATIONS.md) for why.
 
+![Close-up of the most-congested lines (>=90% loaded) and their 1-hop neighborhood](../congestion_zoom_map.png)
+
 ## DC power flow
 
 Run via `run_pf.py --method lpf` as a linear sanity check against the LOPF dispatch. Has been
@@ -24,6 +26,8 @@ clean throughout this project on every network tried -- no convergence issues at
 |---|---|---|
 | 315kV (`elec_solved.nc`, 208 buses) | 0/168 | 0/168 -- no improvement |
 | 735kV (`elec_735kv.nc`, 58 buses, 109 lines) | 50/168 | **168/168** |
+
+![735kV backbone AC PF results at 85% demand -- voltage deviation, line loading, slack/PV buses](../quebec_735kv_ac_pf_map.png)
 
 ### What's been ruled out on the 735kV network
 

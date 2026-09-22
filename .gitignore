@@ -77,3 +77,9 @@ screenlog*
 !data/demand/unsd/paths/Energy_Statistics_Database.xlsx
 site/
 !data/industry/ammonia_plants.csv
+
+# Network doc map images (referenced from network/docs/*.md)
+!network/quebec_real_network_map.png
+!network/quebec_reduced_network_map.png
+!network/quebec_735kv_ac_pf_map.png
+!network/congestion_zoom_map.png

@@ -2,15 +2,15 @@
 """
 add_churchill_falls_tie.py
 
-Add the real Churchill Falls -> Quebec 735 kV interconnection, missing
+Add the Churchill Falls -> Quebec 735 kV interconnection, missing
 from the OSM-derived base network (Churchill Falls' bus/465 had exactly
 one line, at 66 kV -- nowhere near enough for its 5,428 MW).
 
 Source: OSM relation 4504531 ("Hydro-Quebec High-voltage transport
 network - 735 KV"), fetched directly via Overpass
 (network/hq_735kv_osm_relation.json) since PyPSA-Earth's own OSM extract
-didn't pick these ways up. It contains the real Churchill Falls
-substation (735/230/138 kV) and three real parallel 735 kV circuits:
+didn't pick these ways up. It contains the  Churchill Falls
+substation (735/230/138 kV) and three  parallel 735 kV circuits:
 
     way        ref     length (km, from OSM route geometry)
     182119140  L7052   226.0
@@ -20,27 +20,6 @@ substation (735/230/138 kV) and three real parallel 735 kV circuits:
 ...running from Churchill Falls Station (53.529, -63.977) to Poste des
 Montagnais (51.893, -65.728) -- which is already, correctly, bus 306 in
 this network (v_nom=735, coordinates match to 3 decimal places).
-
-Bus 465 (where Churchill Falls' generator currently sits) turned out to
-be a 66 kV local tap, not the 735 kV yard -- PyPSA derives a Line's
-displayed v_nom from its buses' own v_nom, not from what's set on the
-Line itself, so connecting straight to bus 465 silently relabeled these
-735 kV circuits as 66 kV. The real Churchill Falls Station is a
-735/230/138 kV substation (per its own OSM tags) -- modeled here as a
-new dedicated 735 kV bus at its real coordinates, with the generator
-moved onto it. Bus 465 and its existing 66 kV line are left untouched.
-
-Electrical parameters: `type` is set to the same conductor type this
-network already uses for its other 735 kV lines ("Al/St 560/50 4-bundle
-750.0", from config.default.yaml's lines.ac_types), so PyPSA derives r/x/b
-from length the same way as everywhere else. `s_nom` is set from the
-St Clair curve (network/st_clair.py) at 226 km/735 kV, not left at that
-type's flat default: the flat default would give 15,888 MVA combined
-across the 3 circuits (2.9x Churchill Falls' 5,428 MW nameplate), while
-St Clair's length-aware rating gives 11,070 MVA combined (2.0x
-nameplate) -- much closer to physically reasonable for a 3-circuit tie
-sized for N-1 contingency (losing 1 circuit still leaves 7,380 MVA,
-comfortably above the full plant output).
 
 Usage
 -----

@@ -87,8 +87,8 @@ def main():
         snap = n.snapshots[args.snapshot_index]
         print(f"Using snapshot {snap}")
 
-    # Isolate the main AC network (lines+transformers only), matching
-    # every AC PF test earlier in this project.
+    # Isolate the main AC network (lines+transformers only) -- MATPOWER's
+    # base case format has no native DC-link representation.
     G = nx.Graph()
     G.add_nodes_from(n.buses.index)
     for df in (n.lines, n.transformers):

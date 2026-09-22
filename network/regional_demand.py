@@ -3,8 +3,7 @@
 regional_demand.py
 
 PyPSA-Earth's default per-bus demand split is a synthetic population/GDP
-(or, in this project's earliest version, a crude voltage-level) weighting
--- not real. This uses Hydro-Quebec's published historical municipal
+weighting -- not real. This uses Hydro-Quebec's published historical municipal
 consumption (network/consommation-historique-municipalite-11mars2024.xlsx,
 monthly, by municipality and sector, Jan 2016 - Dec 2023) to derive real
 SPATIAL shares of demand, at two granularities:
@@ -22,10 +21,11 @@ SPATIAL shares of demand, at two granularities:
   regions with no region entirely missing, so this level is much more
   complete and is the safer fallback for allocation.
 
-This only replaces the SPATIAL split. The hourly SYSTEM-WIDE total
-still comes from attach_2022_data.py (the real hourly demand xlsx) --
-these regional/municipal shares just decide how that hourly total is
-divided across buses, instead of PyPSA-Earth's synthetic per-bus shares.
+This only produces the SPATIAL split, output as region/municipality-share
+CSVs. The hourly SYSTEM-WIDE demand total is a separate input, applied
+later in the pipeline (rescale_demand_regional.py) -- these shares just
+decide how that total is divided across buses, instead of PyPSA-Earth's
+synthetic per-bus shares.
 
 Usage
 -----
@@ -119,9 +119,9 @@ def allocate_demand_to_buses(n, shares_df, bus_regions_path, name_col="municipal
     Once both exist, the approach is: point-in-polygon (or MRC/region
     name match) each bus's Voronoi cell against the shares geometry,
     aggregate matched shares per bus, renormalize to sum to 1, and use
-    that in place of n.loads_t.p_set's current per-bus share matrix
-    (see attach_2022_data.py's attach_demand -- same "shares x total"
-    pattern, just with a better-sourced shares vector).
+    that in place of n.loads_t.p_set's current per-bus share matrix --
+    same "shares x total" pattern used elsewhere in this pipeline, just
+    with a better-sourced shares vector.
     """
     raise NotImplementedError(
         "Blocked on bus_regions + a municipality/region boundary geometry "

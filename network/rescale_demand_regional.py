@@ -2,28 +2,13 @@
 """
 rescale_demand_regional.py
 
-Fix the network's demand at its source: PyPSA-Earth's synthetic per-bus
-demand (a population/GDP-style proxy applied Canada-wide) turned out to
-be wrong two different ways once checked against real Hydro-Quebec data:
+Rescale a PyPSA-Earth network's synthetic per-bus demand (a population/GDP
+proxy, Canada-wide) to match real Hydro-Quebec data, both in total magnitude
+and in spatial distribution -- matching only the system-wide total leaves
+each bus's share of that total wrong, since the synthetic proxy's regional
+distribution doesn't resemble Quebec's real one.
 
-1. Total magnitude. The raw network's system-wide total for Jan 1-15 2022
-   averages ~79,800 MW -- 2.6x the real HQ total for the same window
-   (~30,900 MW, from 2022-demande-electricite-quebec.xlsx). This means
-   attach_2022_data.py's demand-scaling step was never actually run on
-   the network this project's pipeline builds from.
-
-2. Spatial distribution. Found while investigating unexplained LOPF
-   shedding at two remote 315 kV buses (1638, 2913) near Fermont: their
-   combined synthetic demand was ~2,060 MW, but the REAL Cote-Nord +
-   Nord-du-Quebec regions combined average only ~54 MW for the entire
-   month (hq_regional_demand_region_2022-01.csv, real HQ regional
-   consumption, same Jan 2022 window) -- a ~38x overstatement. Even
-   attach_2022_data.py's approach wouldn't have caught this: it only
-   rescales the system-wide TOTAL and explicitly preserves the existing
-   (synthetic, wrong) per-bus SHARES.
-
-Fix: rescale demand in two nested steps, using two different real
-datasets for each:
+Rescale in two nested steps, using two different real datasets for each:
 
     new_p_set(bus, t) = real_system_total(t)                      [1: total magnitude, 2022-demande-electricite-quebec.xlsx]
                          * real_region_share(region(bus))          [2: spatial distribution, hq_regional_demand_region_2022-01.csv]

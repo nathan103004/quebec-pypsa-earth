@@ -2,27 +2,25 @@
 """
 fix_line_lengths_from_geometry.py
 
-Found while debugging AC PF divergence: 10 of 287 geometry-bearing lines
-in the base network have a `length` attribute wildly inconsistent with
-their own stored geometry (ratio to the geometry's real cumulative
-distance as low as 0.02 -- i.e. length claims 2% of the real path).
-Worst case: line 1358 (buses 1638-2913, the Fermont corridor already
-verified against real OSM data elsewhere in this project) claims 9.5 km
-against a geometry that traces 149.8 km. Three others (194-1715) claim
-under 1 km for paths that are really ~11.7 km.
+10 of 287 geometry-bearing lines in the base network have a `length`
+attribute wildly inconsistent with their own stored geometry (ratio to the
+geometry's real cumulative distance as low as 0.02 -- i.e. length claims 2%
+of the real path). Worst case: line 1358 (buses 1638-2913, the Fermont
+corridor) claims 9.5 km against a geometry that traces 149.8 km. Three
+others (194-1715) claim under 1 km for paths that are really ~11.7 km. This
+is a pre-existing data issue in the OSM-derived base topology, not
+something introduced by any script in this project.
 
 Since r/x/b (via apply_line_types) and the St-Clair-derived s_nom both
-scale with `length`, an understated length silently produces an
-understated impedance -- tolerated by LOPF/DC-PF's linear solve, but bad
-enough (x_pu down to 2.3e-7, an 8,071x spread in the Y-matrix diagonal
-magnitude) to make AC PF's Newton-Raphson diverge on every snapshot.
-This is a pre-existing data bug inherited from the OSM-derived base
-topology, not something introduced by any script in this project.
+scale with `length`, an understated length produces an understated
+impedance -- tolerated by LOPF/DC-PF's linear solve, but enough to make AC
+PF's Newton-Raphson diverge (x_pu down to 2.3e-7 on the worst line, an
+8,071x spread in the Y-matrix diagonal magnitude).
 
 Fix: recompute `length` for every line from its own geometry (haversine
 cumulative distance across all MultiLineString segments) wherever that
 disagrees with the stored value by more than 3x either way -- the
-geometry itself looks intact, only `length` is wrong.
+geometry itself is intact, only `length` is wrong.
 
 Usage
 -----

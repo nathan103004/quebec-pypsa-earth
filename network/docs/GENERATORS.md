@@ -11,11 +11,15 @@ units after `reduce_voltage_network.py`'s reassignment (none dropped); capacitie
 | Solar (`solar`) | 3 | 12 | Real facility list; dispatched by weather-derived capacity factor |
 | OCGT (gas) | 1 | 411 | Real 2022 hourly `Thermique` dispatch |
 | Load shedding | 191 | 39,260 (sized to local peak) | Synthetic VOLL placeholder, $10,000/MWh, one per load bus |
-| Churchill Falls import (`AC`, at slack) | 1 | 7,722 | Real interconnection, added by `add_churchill_falls_tie.py` |
+| Slack placeholder (`AC`) | 1 | 7,722 | Zero-dispatch bookkeeping generator at bus 339 (see Slack bus below) -- not real capacity itself |
 
 Load-shedding generators are a modeling device, not real capacity: they exist so LOPF can shed
 load at a heavy cost penalty instead of failing to solve, and their dispatch is the metric used to
 report unserved load (currently 0% on the solved network).
+
+Churchill Falls' real 5,428 MW is included in the hydro storage total above (`465
+hydro-Churchill-Falls`, at bus `465-735kv`, added by `add_churchill_falls_tie.py`) -- it isn't a
+separate line item; it's one of the 18 storage units.
 
 ## Dispatch ceilings
 
@@ -41,4 +45,6 @@ combined) on the network's largest AC-connected component. PyPSA's own bus-contr
 (`find_bus_controls()` / `find_slack_bus()`) only ever reads `Generator.control`, never
 `StorageUnit.control` -- confirmed directly from `pypsa/pf.py` source -- so a storage-only bus
 gets a zero-dispatch placeholder `Generator` added so it can still be a slack candidate on equal
-terms. On the current solved network this lands on bus 340 (7,722 MW, the Churchill Falls tie).
+terms. On the current solved network this lands on bus 339 (7,722 MW combined: the
+`339 hydro-La-Grande-2-A` and `339 hydro-Robert-Bourassa` storage units), via the placeholder
+`339 slack-placeholder`.

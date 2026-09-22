@@ -18,7 +18,7 @@ Steps
 3. For each local bus, find its nearest backbone bus (straight-line
    distance).
 4. Reassign every load, generator, and storage unit sitting on a local
-   bus onto that nearest backbone bus. Goal is to make sure nothing is dropped or deleted 
+   bus onto that nearest backbone bus. Goal is to make sure nothing is dropped or deleted
 5. Drop local buses, and every line/transformer/link that isn't
    entirely between two surviving backbone buses.
 

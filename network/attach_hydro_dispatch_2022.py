@@ -13,7 +13,7 @@ for the seasonal demand peak, which a naive current-month inflow signal
 can't see). Left as-is, this caused large hydro underutilization and
 didn't match real historical dispatch for winter snapshots.
 
-Method (same approach used in this project before rebuilding it):
+Method:
 1. Take the real, historical 2022 hourly "Hydraulique" (hydro) dispatch
    total from network/2022-sources-electricite-quebec.csv.
 2. Split that total between the ror and hydro (reservoir) carriers by
@@ -61,8 +61,8 @@ SOURCES_CSV = os.path.join(NETWORK_DIR, "2022-sources-electricite-quebec.csv")
 
 def align_to_snapshots(df: pd.DataFrame, date_col: str, snapshots: pd.DatetimeIndex, shift: pd.Timedelta) -> pd.DataFrame:
     """Shift interval-ending timestamps back to interval-beginning and
-    reindex onto the network's snapshots (see attach_2022_data.py, same
-    convention: this source file is half-hour-ending)."""
+    reindex onto the network's snapshots (this source file is
+    half-hour-ending)."""
     out = df.copy()
     out[date_col] = pd.to_datetime(out[date_col]) - shift
     # DST fall-back creates one duplicate timestamp per year (e.g. Nov 6

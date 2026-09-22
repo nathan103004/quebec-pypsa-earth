@@ -8,11 +8,11 @@ Map of the solved main-island (simplified/reduced) network
 - Lines, colored by congestion level (max loading over all snapshots as a
   fraction of s_nom) -- green/amber/orange/red buckets. Both the LOPF
   result and a fresh DC power flow cross-check (n.lpf()) are computed and
-  embedded together; a dropdown switches which one the map shows. (DC PF
-  uses p_set, not p, for generators/storage -- see the conversation this
-  script came out of: p_set was 0.0 for every non-slack unit, which
-  silently forced the whole system's real power through the slack bus
-  alone until this was found and fixed.)
+  embedded together; a dropdown switches which one the map shows. n.lpf()
+  reads generators_t.p_set/storage_units_t.p_set, not p, so those are
+  synced from the solved dispatch before the DC solve -- otherwise every
+  non-slack unit's real power injection is 0 and the slack bus alone
+  absorbs the whole system's real power.
 - Loads, sized by mean demand (MW).
 - Load shedding, as a red overlay on top of shedding buses, sized by mean
   shed (MW) -- so a bus's normal load marker and its shedding both show.

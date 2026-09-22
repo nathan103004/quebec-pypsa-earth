@@ -1,8 +1,7 @@
 # Assumptions and limitations
 
 Every generic or unmeasured assumption used in this pipeline, with the reasoning behind the
-specific value chosen. Documented at the point it's introduced in code as well; this is the
-consolidated list.
+specific value chosen..
 
 ## Generic assumptions (LOPF / general)
 
@@ -27,21 +26,17 @@ consolidated list.
 
 ## Known data limitations
 
-- **`num_parallel` does not represent real physical circuit count.** It's a per-row attribute,
-  effectively always ~1.0 in the source data. Real multi-circuit corridors are instead represented
-  as multiple separate `Line` rows sharing the same bus pair.
-- **`reduce_voltage_network.py` uses straight-line geographic distance**, not graph shortest-path,
-  to assign local buses to their nearest backbone bus. This has caused confirmed real
-  misassignments in this project already (a substation reassigned 257km away; Ottawa-area loads
-  assigned to a Quebec bus across the provincial border) -- and a newly-found, more severe case:
-  **28 loads pooled onto 735kV bus 3554 from as far as 281.6km away** (1,482 MW total), and 21
-  loads onto bus 1081 from up to 87.9km away (1,084 MW). Both buses sit on the network's one
-  electrically weak 735/765kV bridge corridor, and this concentration is a likely contributing
-  cause of the AC PF convergence gap there (see [POWER_FLOW.md](POWER_FLOW.md)). `reduce_to_735kv.py`
-  uses graph shortest-path specifically to avoid this, but the fix was never retrofitted into
-  `reduce_voltage_network.py` itself.
-- **AC power flow does not converge on either reduced network at current real demand** (see
-  [POWER_FLOW.md](POWER_FLOW.md) for the full investigation). The 735kV network converges fully at
-  85% of current demand (a genuine loadability-margin finding); the 315kV network does not respond
-  to demand reduction at all and fails much more severely -- a structurally different, still
-  undiagnosed problem.
+- **Parallel-circuit count isn't reliably encoded in the raw data.** Real multi-circuit corridors
+  show up as separate line records rather than a per-line circuit-count field, so any code path
+  that trusted that field instead of counting real records would misstate corridor capacity.
+- **Local-to-backbone bus reassignment uses straight-line geographic distance**, not real grid
+  connectivity. This has repeatedly misassigned demand to the wrong backbone bus, sometimes
+  pooling load from remote, unconnected areas onto a nearby-looking bus -- a real data-quality
+  risk anywhere this reduction step is used, and a known contributor to unrealistic local stress
+  in downstream results. A more accurate (graph-based) alternative exists elsewhere in the
+  pipeline but hasn't been adopted for this step.
+- **AC power flow does not converge on either reduced network at current real demand.** One
+  network's convergence is sensitive to overall demand level (fails at 100%, succeeds at a
+  reduced level) without an identified physical mechanism; the other fails much more severely and
+  independently of demand level. Neither points to a specific fixable cause yet -- see
+  [POWER_FLOW.md](POWER_FLOW.md).

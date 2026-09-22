@@ -10,8 +10,7 @@ located outside Quebec) is dropped.
 
 Why this is needed
 -------------------
-Inspecting the freshly-built network showed two different situations
-that both needed fixing:
+Two different problems in the freshly-built network:
 
 1. Real, but wrong scope. `ror` (run-of-river) generators, `hydro`
    StorageUnits, and `CCGT` generators are already REAL matched plants
@@ -60,9 +59,8 @@ guessed at.
 
 Churchill Falls (5,428 MW, matches exactly by name, real bus already
 assigned) is included even though it is physically in Labrador (NL), not
-Quebec -- see the discussion earlier in this project: Hydro-Quebec has
-contracted almost all of its output until 2041, so its power is
-effectively part of the Quebec supply.
+Quebec -- Hydro-Quebec has contracted almost all of its output until 2041,
+so its power is effectively part of the Quebec supply.
 
 Time-varying profiles
 -----------------------

@@ -14,9 +14,7 @@ show -- LOPF/DC PF never touch voltage magnitude or reactive power at all:
   a glance which buses those are).
 - Lines, colored by max AC PF loading over all snapshots (same congestion
   bucket scheme used elsewhere in this project, for a consistent read).
-- Shunt capacitors, as a small overlay sized by their real MVAr at V=1pu
-  (the equipment specifically added to reach full AC PF convergence --
-  see the debugging report for why).
+- Shunt capacitors, as a small overlay sized by their real MVAr at V=1pu.
 - Hover text carries the full picture per bus: mean/worst v_mag_pu, mean
   v_ang, bus type, local load, local shunt MVAr.
 

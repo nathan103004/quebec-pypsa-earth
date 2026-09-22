@@ -176,9 +176,7 @@ def main():
     # Width scales with voltage only. `num_parallel` is deliberately not used
     # here: in this dataset it's a per-row attribute (almost always 1.0), not
     # a per-corridor circuit count -- real multi-circuit corridors are stored
-    # as multiple separate Line rows instead of one row with num_parallel>1,
-    # so averaging that attribute is misleading (see the corridor-grouping
-    # analysis done in the conversation this came from).
+    # as multiple separate Line rows instead of one row with num_parallel>1.
     for v_nom, grp in lines.groupby("v_nom"):
         color = VOLTAGE_COLORS.get(v_nom, DEFAULT_LINE_COLOR)
         width = float(np.clip(1.0 + 1.2 * np.log1p(v_nom / 100), 1.0, 8.0))

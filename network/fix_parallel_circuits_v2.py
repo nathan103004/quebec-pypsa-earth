@@ -4,8 +4,8 @@ fix_parallel_circuits_v2.py
 
 Correct undercounted parallel circuits across Quebec's whole >=315 kV
 backbone (735, 315, 765 kV), superseding fix_parallel_circuits.py (which
-only covered 735 kV, and only the 67 corridors captured by one "collection"
-relation -- incomplete, as it turned out).
+only covered 735 kV, via the 67 corridors captured by one "collection"
+relation).
 
 Source: every individual Hydro-Quebec-operated line circuit tagged as
 its own OSM relation within Quebec's bounding box (99 relations at
@@ -18,11 +18,10 @@ robust to multi-segment ways, unlike just taking first/last coordinates).
 84/99 relations resolved to exactly 2 terminals (15 skipped -- branched
 or incomplete geometry, not usable this way).
 
-Corridors are then formed by clustering terminal points within ~1 km
-(not by matching to named substations, which turned out to be
-incomplete for 315 kV -- the 735kV-focused substation list didn't cover
-it) -- 84 circuits collapse to 55 real corridors: 36 single-circuit, 11
-double, 6 triple, 2 quadruple.
+Corridors are formed by clustering terminal points within ~1 km (not by
+matching to named substations -- the available substation list is
+735kV-focused and incomplete for 315 kV) -- 84 circuits collapse to 55
+real corridors: 36 single-circuit, 11 double, 6 triple, 2 quadruple.
 
 Method: same as fix_parallel_circuits.py -- match our network's own
 line endpoints to the nearest real corridor cluster, compare modeled

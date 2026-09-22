@@ -52,9 +52,9 @@ project without re-deriving everything from scratch.
    - `regional_demand.py` / `rescale_demand_regional.py` — replaced PyPSA-Earth's synthetic
      population/GDP demand proxy with real HQ municipal consumption data; fixed a 2.6x magnitude
      error in total system demand.
-   - `attach_2022_data.py` / `attach_hydro_dispatch_2022.py` / `attach_real_generators.py` /
-     `build_hq_contracts_data.py` — replaced synthetic generation with real 2022 dispatch data
-     (Hydro-Québec's published hourly generation-by-source and IPP contract data).
+   - `attach_hydro_dispatch_2022.py` / `attach_real_generators.py` / `build_hq_contracts_data.py` —
+     replaced synthetic generation with real 2022 dispatch data (Hydro-Québec's published hourly
+     generation-by-source and IPP contract data).
    - `reduce_voltage_network.py` — collapses low-voltage buses onto the nearest backbone bus.
      **Known flaw, already found and worked around downstream**: uses straight-line geographic
      nearest-neighbor, which caused two confirmed real misassignments (a bus 257km away from

@@ -25,7 +25,11 @@ Z_pu_old * (S_new / S_old) relation.
 
 Generator reactive capability (Qmax/Qmin) isn't in the source data (no real
 generator Q-capability curves), but is a mandatory MATPOWER column. Uses a
-generic +-tan(acos(0.85)) * Pmax assumption -- not measured.
+generic +-tan(acos(0.85)) * Pmax assumption -- not measured. Qg itself is
+always exported as 0 (a fixed injection for any generator not on a PV/slack
+bus, in MATPOWER's convention) -- real/storage generators keep their real Pg
+but lose their solved Q; PyPSA's zero-real-power reactive-compensation
+generators are excluded entirely rather than exported as dead (0, 0) rows.
 
 Usage
 -----
@@ -112,7 +116,14 @@ def main():
 
     lines = n.lines[n.lines.bus0.isin(main_ac) & n.lines.bus1.isin(main_ac)]
     trafos = n.transformers[n.transformers.bus0.isin(main_ac) & n.transformers.bus1.isin(main_ac)]
-    gens = n.generators[(n.generators.bus.isin(main_ac)) & (n.generators.carrier != "load_shedding")]
+    # Exclude load-shedding placeholders (not real capacity) and reactive-
+    # compensation placeholders (p=0 always, and Qg is exported as 0 below --
+    # see docstring -- so they'd inject nothing anyway; excluding them makes
+    # that explicit instead of leaving dead rows in the case).
+    gens = n.generators[
+        (n.generators.bus.isin(main_ac))
+        & (~n.generators.carrier.isin(["load_shedding", "reactive_compensation"]))
+    ]
     sus = n.storage_units[n.storage_units.bus.isin(main_ac)]
     loads = n.loads[n.loads.bus.isin(main_ac)]
 

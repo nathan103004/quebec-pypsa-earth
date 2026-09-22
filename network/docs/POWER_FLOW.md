@@ -36,7 +36,7 @@ Several fixes attemped but all failed to meaningfully improve convergence:
   3554, 136, 1081, 195, 603, 1717 -- the 735/765kV bridge area) across every tested snapshot, but
   increasing loading capacity of the lines connected to the exact bus yielded no meaningful result: 0/71
 
-Only a uniform reduction of real+reactive power at every bus simultaneously works; Confirmed as 168/168 across the full network at 85% scale).
+Only a uniform reduction of real+reactive power at every bus simultaneously works; Confirmed as 168/168 across the full network at 85% scale.
 
 ### The 315kV network fails differently
 
@@ -44,6 +44,26 @@ Unlike the 735kV network, reducing demand 15% does **not** help the 315kV networ
 0/168, with far more extreme numerical blowup -- 273/276 lines "loaded" past absurd percentages).
 This isn't a loadability-margin problem like the 735kV case; something structurally different is
 going on, and it hasn't been diagnosed.
+
+### MATPOWER cross-check
+
+`export_to_matpower.py` exports a single snapshot (a static case format, not a time series) to an
+independent solver. Tested at the easiest (lowest-loaded) snapshot for both the 85%-scaled and
+real 100%-demand 735kV networks -- **both converged in MATPOWER**, confirming PyPSA's own result
+independently at that hour. This is a relaxed test, not a stress test: the snapshot was
+deliberately chosen as the easiest of the week, so it doesn't speak to the snapshots that fail.
+
+| Metric | PyPSA (100%) | MATPOWER (100%) |
+|---|---|---|
+| Total load P/Q | 24,763.3 / 8,139.3 | 24,763.3 / 8,139.3 (exact match) |
+| Total generation P | 25,837.6 | 25,914.0 |
+| Voltage magnitude range | 0.995-1.115 pu | 0.927-1.082 pu |
+| Slack P/Q | 3,586.1 / -594.8 | 4,361.6 / +504.7 (**sign flips**) |
+| Line losses P | 1,074.3 MW | 1,150.7 MW |
+
+Real power/load agree closely; reactive power and voltage magnitude diverge between solvers, more
+so at 100% than at 85% demand -- consistent with the system's reactive-power solution becoming
+less well-constrained as demand rises, in both solvers, not just PyPSA.
 
 ### Generic assumptions used only for AC PF
 

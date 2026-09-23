@@ -13,10 +13,11 @@ levels of detail for different purposes.
 | Generators (real) | 68 | 65 | 24 |
 | Storage units | 18 | 18 | 10 |
 | Load served | -- | 0% shed | -- |
-| AC power flow | not attempted | 0/168 | 85/168 (**168/168 at 62% of demand**) |
+| AC power flow | not attempted | 0/168 | 157/168 (**168/168 at 82% of demand**) |
 
-The 735kV backbone converges fully once demand is reduced to 62% of its current level.
-The 315kV network doesn't respond to demand reduction
+The 735kV backbone converges fully once demand is reduced to 82% of its current level (up from 62%
+before 50% series compensation was added on the three identified weak corridors -- see
+[POWER_FLOW.md](docs/POWER_FLOW.md)). The 315kV network doesn't respond to demand reduction
 the same way; see [POWER_FLOW.md](docs/POWER_FLOW.md) for the full investigation.
 
 See [docs/NETWORKS.md](docs/NETWORKS.md) for what each network is for and how they relate.

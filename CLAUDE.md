@@ -29,11 +29,12 @@ project without re-deriving everything from scratch.
   3. **735kV reduced** (`elec_735kv.nc`, 58 buses, 109 lines) — a further reduction down to just
      the 735/765kV backbone (`reduce_to_735kv.py`), aggregating everything else onto backbone
      buses by graph shortest-path. Purpose-built for AC PF tractability. At current real demand it
-     converges 85/168 snapshots, but a clean 168/168 at 62% of that demand
-     (`elec_735kv_scaled62.nc`) — a genuine, well-tested but still mechanistically unexplained
-     finding (see `network/docs/POWER_FLOW.md`).
+     converges 157/168 snapshots, and a clean 168/168 at 82% of that demand
+     (`elec_735kv_scaled82.nc`) — now a diagnosed and partly-fixed finding (voltage collapse at
+     three specific buses, fixed with series compensation on their feeding lines; see
+     `network/docs/POWER_FLOW.md`).
   4. A copy of the current, verified pipeline outputs (`elec_full.nc`, `elec_reduced.nc`,
-     `elec_solved.nc`, `elec_735kv.nc`, `elec_735kv_scaled62.nc`/`_pf.nc`) is kept in
+     `elec_solved.nc`, `elec_735kv.nc`, `elec_735kv_scaled82.nc`/`_pf.nc`) is kept in
      `network/networks_current/` — use that to know which files in `networks/` are the real
      current state vs. stale/diagnostic leftovers. Pre-line-reactance-fix originals are backed up
      in `network/networks_backup_pre_hypersim/`.
@@ -130,18 +131,32 @@ project without re-deriving everything from scratch.
   This materially tightened AC PF convergence (see below) — treat any AC-PF-related finding dated
   before 2026-09-23 as describing the old, understated-reactance network. Pre-fix networks are
   backed up in `network/networks_backup_pre_hypersim/`.
-- **735kV backbone** (`elec_735kv.nc`, 109 real lines): 85/168 at current real demand (~30,200 MW
-  mean, calibrated against real whole-January-2022 HQ data), **168/168 at 62% of that demand**
-  (`elec_735kv_scaled62.nc`). An extensive elimination process (reactive compensation,
-  single/combined/all-lines reinforcement, continuation power flow, single-PV-bus removal,
-  modal/eigenvector analysis) ruled out every localized fix — only reducing total real+reactive
-  power everywhere works, meaning the constraint is systemic, not one fixable component. The
-  mechanism is still not identified. That elimination testing predates the reactance fix and
-  hasn't been re-verified against it, though the demand-scale threshold has (85%→62%).
-  `network/quebec_735kv_ac_pf_map.html` is generated from this 62%-scaled, fully-converged,
-  all-real-data network.
+- **The AC PF mechanism on the 735kV network IS now identified** (unlike what the elimination
+  testing below once suggested): continuation (homotopy) power flow on every failing snapshot
+  showed genuine voltage collapse (Newton-Raphson's Jacobian went exactly singular at one point —
+  a saddle-node bifurcation, not a solver quirk) at exactly **three buses** (308, 1291, 312) — all
+  fed only by 250-500km lines with no local voltage-controlling generation. Having no local
+  generation isn't itself predictive (36/58 buses share that trait harmlessly, e.g. bus 195 carries
+  10,354 MW with no local gen but short lines); what matters is long line length combined with no
+  genuinely independent second path to a real source.
+- **Fix: 50% series compensation on the ten lines feeding those three buses**
+  (`apply_series_compensation.py`, `COMPENSATION_FRACTION = 0.50`, a generic planning-level
+  assumption not a measured HQ figure) — matches real Hydro-Québec practice on its longest 735kV
+  corridors. A synchronous-condenser (PV bus) approach was tried first and reached 151/168 at 100%
+  demand; series compensation reached **157/168** and is more realistic for this specific failure
+  mode (it treats the actual cause, line reactance, rather than adding a device to work around it).
+- **735kV backbone** (`elec_735kv.nc`, 109 real lines): 157/168 at current real demand (~30,200 MW
+  mean, calibrated against real whole-January-2022 HQ data), **168/168 at 82% of that demand**
+  (`elec_735kv_scaled82.nc`, up from 62% before series compensation). The remaining 11 failures at
+  100% demand are the week's highest-demand hours — continuation power flow suggests a genuine
+  active-power/angle-stability limit there, not a reactive-support gap; not yet investigated
+  further. The earlier elimination process (reactive compensation, single/combined/all-lines
+  *thermal* reinforcement, modal/eigenvector analysis) that found no localized fix worked was
+  testing a different kind of intervention (capacity, not reactance) on the old, understated-
+  reactance network — not a contradiction of the fix above, just untested against it.
+  `network/quebec_735kv_ac_pf_map.html` is generated from this 82%-scaled, fully-converged network.
 - **315kV full network** (`elec_solved.nc`, 205 buses): 0/168, and unlike the 735kV network,
-  **demand reduction doesn't help at all** (still 0/168 even at 62% demand, with far more extreme
+  **demand reduction doesn't help at all** (still 0/168 even at 82% demand, with far more extreme
   numerical blowup). This is a structurally different, still-undiagnosed problem — the biggest
   open question in the project.
 - **`reduce_voltage_network.py`'s straight-line reassignment** was replaced with graph

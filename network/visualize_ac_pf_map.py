@@ -42,7 +42,7 @@ from visualize_real_network_map import (  # noqa: E402
     marker_size,
 )
 
-DEFAULT_NETWORK = os.path.join(NETWORK_DIR, "networks_current", "elec_735kv_scaled62_pf.nc")
+DEFAULT_NETWORK = os.path.join(NETWORK_DIR, "networks_current", "elec_735kv_scaled82_pf.nc")
 DEFAULT_OUTPUT = os.path.join(NETWORK_DIR, "quebec_735kv_ac_pf_map.html")
 
 CONGESTION_BUCKETS = [

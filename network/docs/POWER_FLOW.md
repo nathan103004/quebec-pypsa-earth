@@ -8,10 +8,12 @@ Solved on the main 315kV working network's largest island (205 buses) over a one
 - **0% load shed.** Every hour's demand is fully served from the modeled fleet.
 - Mean demand ~30,200 MW, calibrated against real whole-January-2022 system demand
   (`historique-demande-electricite-quebec.csv`).
-- Max line loading ~96% -- security margin (`s_max_pu`) is relaxed from PyPSA-Earth's default 0.7
-  to 1.0; see [ASSUMPTIONS_AND_LIMITATIONS.md](ASSUMPTIONS_AND_LIMITATIONS.md) for why.
-
-![Close-up of the most-congested lines (>=90% loaded) and their 1-hop neighborhood](../congestion_zoom_map.png)
+- Max line loading ~78.5%, **0 lines >= 90% loaded** -- down from ~96% (1 line >= 90%) before the
+  line reactance correction and series compensation below; security margin (`s_max_pu`) is still
+  relaxed from PyPSA-Earth's default 0.7 to 1.0, see
+  [ASSUMPTIONS_AND_LIMITATIONS.md](ASSUMPTIONS_AND_LIMITATIONS.md) for why that relaxation exists.
+  No congestion close-up map is generated any more (`visualize_congestion_zoom.py` finds nothing
+  to zoom into, by design, when no line clears the 90% threshold).
 
 ## DC power flow
 
@@ -21,14 +23,15 @@ clean throughout this project on every network tried -- no convergence issues at
 ## AC power flow (full nonlinear Newton-Raphson) -- open, unresolved
 
 **Neither reduced network fully converges under AC PF at current real demand.** Current state
-(line reactance corrected against real Hydro-Quebec data -- see the note below the table):
+(line reactance corrected against real Hydro-Quebec data, plus series compensation on the
+identified weak corridors -- see the sections below):
 
 | Network | Convergence at current demand | At reduced demand |
 |---|---|---|
-| 315kV (`elec_solved.nc`, 205 buses) | 0/168 | 0/168 at 62% -- no improvement |
-| 735kV (`elec_735kv.nc`, 58 buses, 109 lines) | 85/168 | **168/168 at 62%** |
+| 315kV (`elec_solved.nc`, 205 buses) | 0/168 | 0/168 at 82% -- no improvement |
+| 735kV (`elec_735kv.nc`, 58 buses, 109 lines) | 157/168 | **168/168 at 82%** |
 
-![735kV backbone AC PF results at 62% demand -- voltage deviation, line loading, slack/PV buses](../quebec_735kv_ac_pf_map.png)
+![735kV backbone AC PF results at 82% demand -- voltage deviation, line loading, slack/PV buses](../quebec_735kv_ac_pf_map.png)
 
 **Line reactance correction (2026-09-23):** every line's r/x/b previously came from PyPSA-Earth's
 generic default type (`Al/St 560/50 4-bundle 750.0`, a German textbook value at 50Hz -- see
@@ -36,42 +39,90 @@ generic default type (`Al/St 560/50 4-bundle 750.0`, a German textbook value at 
 project's own CSVs, which had only ever been wired into the St Clair thermal (`s_nom`) calculation.
 Fixed via `fix_line_reactance_hypersim.py` (all AC lines >= 220kV, log-log interpolated from the
 Hypersim/EMTP table) and `apply_hq_line_characteristics.py` (315/345kV and 735/765kV lines
-specifically, overridden with Hydro-Quebec's own exact real line-characteristics table -- more
-authoritative than the interpolated Hypersim values for exactly the two tiers this project's
-reduced networks keep). Net effect: 735kV line x_pu +19-20%, 315kV x_pu roughly -8% (HQ's real
-315kV data has lower reactance than the interpolated Hypersim estimate). This **materially
-tightened** AC PF convergence -- the demand level needed for full 735kV convergence dropped from
-85% to 62%, and 100%-demand convergence changed from 50/168 to 85/168. This is a real change in
-the model's difficulty, not a relabeling -- treat any AC PF finding from before this fix as
-referring to the old, understated-reactance network.
+specifically, overridden with Hydro-Quebec's own exact real line-characteristics table). Net
+effect: 735kV line x +19-20%, 315kV line x roughly +36% (compared to the old generic-type default
+-- the earlier "-8%" figure documented at one point was only relative to an intermediate
+interpolated estimate, not the true starting point). This **materially tightened** AC PF
+convergence at first -- before the series compensation fix below, the demand level needed for full
+735kV convergence dropped from 85% to 62%, and 100%-demand convergence changed from 50/168 to
+85/168. Treat any AC PF finding from before 2026-09-23 as referring to the old,
+understated-reactance network.
 
-### What's been ruled out on the 735kV network
+### Diagnosing *why* -- voltage collapse at three specific buses
 
-Several fixes attemped but all failed to meaningfully improve convergence:
+Continuation (homotopy) power flow -- ramping demand from an easy, converged level up in small
+steps, warm-starting each step from the last -- was run on every snapshot that failed at 100%
+demand on the corrected-reactance network. This reveals the network's *true* physical loadability
+limit directly (the point where the AC power flow equations stop having a real solution at all),
+rather than inferring it from solver failure alone. Across all 83 failing snapshots, only **three
+buses** ever came up as the point of collapse:
+
+| Bus | Times it was the collapse point | Local load | Local generation |
+|---|---|---|---|
+| 308 | 53 / 83 | 1,511 MW | none |
+| 1291 | 27 / 83 | 135 MW | none |
+| 312 | 3 / 83 | 690 MW | 411 MW (present but not voltage-controlling) |
+
+All three are fed only by very long (250-500km) lines, with no local generation to hold voltage up
+independently. Newton-Raphson's own Jacobian went exactly singular at one of these snapshots
+(`MatrixRankWarning: Matrix is exactly singular`) -- the precise mathematical signature of a
+saddle-node bifurcation, confirming this is genuine voltage collapse, not a solver quirk. Bus
+1291's true collapse point traced a textbook nose curve as demand rose (v_mag_pu: 1.00 -> 0.99 ->
+0.96 -> 0.90 -> 0.83 -> no solution). Note that having no local generation isn't itself the
+predictor -- 36 of the 58 buses on this network share that trait harmlessly (e.g. bus 195 carries
+10,354 MW of load with no local generation at all, but its lines are short, so voltage drop stays
+small). What matters is the combination of long line length *and* no genuinely independent second
+path to a real source; bus 308's apparent redundancy (6 lines) is largely illusory, since 3 of them
+just lead to bus 312, itself stressed.
+
+**Fix: 50% series compensation on the ten lines feeding these three buses**
+(`apply_series_compensation.py`) -- a capacitor bank in series with the conductor, directly
+cancelling half the line's own reactance (`x_new = x * (1 - 0.5)`). This is the standard real-world
+fix for exactly this failure mode (a line whose length alone makes its reactance the binding
+constraint), and matches Hydro-Quebec's own real 735kV practice on its longest corridors. A
+synchronous-condenser approach (PV bus, unconstrained reactive injection) was tried first and
+reached 151/168 at 100% demand; series compensation reached **157/168** and pushed the
+full-convergence demand threshold from 62% to 82% -- more effective, and more realistic for this
+specific problem, since it treats the actual root cause (line reactance) rather than adding a
+device to work around it. `COMPENSATION_FRACTION = 0.50` is a generic planning-level assumption
+(real EHV series compensation typically runs 30-70%), not a measured Hydro-Quebec figure for these
+specific lines -- see [ASSUMPTIONS_AND_LIMITATIONS.md](ASSUMPTIONS_AND_LIMITATIONS.md).
+
+The remaining 11 failures (at 100% demand, post-compensation) are the week's highest-demand hours
+(30,400-36,564 MW) -- continuation power flow on the hardest of these shows a true collapse point
+around 78-86% demand even with compensation, suggesting a genuine active-power/angle-stability
+limit rather than a reactive-support gap. Not yet investigated further.
+
+### What's been ruled out on the 735kV network (pre-reactance-fix testing)
+
+The following was tested on the *old*, understated-reactance network, before either fix above --
+not yet re-tested against the current network:
 
 - 10x local reactive compensation at every bus: 1/71 (of the snapshots that fail at baseline)
-- Strengthening any single stressed corridor, or the top 3/6 most-loaded corridors (2x capacity): 0/71
-- Doubling capacity on **all 109 lines network-wide**: 0/71
-- Modal (eigenvector) analysis consistently identifies the same critical bus cluster (132, 133,
-  3554, 136, 1081, 195, 603, 1717 -- the 735/765kV bridge area) across every tested snapshot, but
-  increasing loading capacity of the lines connected to the exact bus yielded no meaningful result: 0/71
+- Strengthening any single stressed corridor, or the top 3/6 most-loaded corridors (thermal
+  capacity increase, not reactance reduction): 0/71
+- Doubling thermal capacity on **all 109 lines network-wide**: 0/71
+- Modal (eigenvector) analysis consistently identified a critical bus cluster (132, 133, 3554, 136,
+  1081, 195, 603, 1717 -- the 735/765kV bridge area) across every tested snapshot, but increasing
+  loading capacity of the lines connected to it yielded no meaningful result: 0/71
 
-Only a uniform reduction of real+reactive power at every bus simultaneously works; confirmed as
-168/168 across the full network at 62% scale (this elimination testing itself was done before the
-reactance correction above -- the qualitative finding, that no localized reinforcement helps, has
-not been re-tested against the corrected network, only the demand-scale threshold has).
+None of these tested *reducing reactance itself* on the affected lines -- only thermal/capacity
+reinforcement, which doesn't address a reactance-driven voltage-collapse mechanism. That's
+consistent with the series compensation fix above working where these didn't: it's a different
+kind of intervention, not a repeat of one already ruled out.
 
 ### The 315kV network fails differently
 
 Unlike the 735kV network, reducing demand does **not** help the 315kV network at all (still 0/168
-even at 62% demand, with far more extreme numerical blowup -- hundreds of lines "loaded" past
+even at 82% demand, with far more extreme numerical blowup -- hundreds of lines "loaded" past
 absurd percentages). This isn't a loadability-margin problem like the 735kV case; something
 structurally different is going on, and it hasn't been diagnosed.
 
 ### MATPOWER cross-check
 
-**Predates the line reactance correction above -- not yet re-run against the corrected network.**
-The numbers below describe the old, understated-reactance 735kV network.
+**Predates both the line reactance correction and the series compensation fix above -- not yet
+re-run against the current network.** The numbers below describe the old, understated-reactance,
+uncompensated 735kV network.
 
 `export_to_matpower.py` exports a single snapshot (a static case format, not a time series) to an
 independent solver. Tested at the easiest (lowest-loaded) snapshot for both the 85%-scaled and

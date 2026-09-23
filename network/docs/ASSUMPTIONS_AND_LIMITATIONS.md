@@ -14,6 +14,7 @@ specific value chosen..
 | Dispatch ceiling headroom | x1.10 on real-data-derived ratios | `run_lopf_main_island.py` | Applied to ror, OCGT, and hydro storage ceilings (all derived from real 2022 hourly dispatch ratios) so the model isn't forced to never exceed the exact historical dispatch level. Not applied to wind/solar, which use weather-derived capacity factors, not dispatch history. |
 | Link 4349 (329-3975 DC tie) capacity | x3 | `run_lopf_main_island.py` | Undersized at its source value, forcing shedding upstream despite real generation capacity existing to cover it. Insensitive to going further (x6 gave the same result as x3). |
 | Line reactance below 220kV | PyPSA-Earth's generic default type (German textbook, 50Hz, not Quebec-specific) | `elec_full.nc`'s `type` field, unmodified | No real Quebec data source exists at this voltage range. Doesn't affect the reduced/solved networks (they only keep >=315kV lines) -- only the unreduced reference map. At 315/345/735/765kV, real Hydro-Quebec data is used instead (`apply_hq_line_characteristics.py`); at other tiers >=220kV, an interpolated real 60Hz estimate is used (`fix_line_reactance_hypersim.py`) -- see [DATA_SOURCES.md](DATA_SOURCES.md). |
+| Series compensation degree | 50% | `apply_series_compensation.py` | Applied to the ten longest lines feeding the three buses (308, 1291, 312) diagnosed as the network's only AC PF voltage-collapse points. Real EHV series compensation typically runs 30-70% on the longest corridors; 50% is a mid-range planning value, not a measured Hydro-Quebec figure for these specific lines. Real series compensation also risks sub-synchronous resonance at high compensation degrees -- not modeled here (steady-state power flow only). |
 
 ## Generic assumptions (AC power flow only)
 
@@ -36,8 +37,8 @@ specific value chosen..
   risk anywhere this reduction step is used, and a known contributor to unrealistic local stress
   in downstream results. A more accurate (graph-based) alternative exists elsewhere in the
   pipeline but hasn't been adopted for this step.
-- **AC power flow does not converge on either reduced network at current real demand.** One
-  network's convergence is sensitive to overall demand level (fails at 100%, succeeds at a
-  reduced level) without an identified physical mechanism; the other fails much more severely and
-  independently of demand level. Neither points to a specific fixable cause yet -- see
-  [POWER_FLOW.md](POWER_FLOW.md).
+- **AC power flow does not converge on either reduced network at current real demand.** The 735kV
+  network's failure is diagnosed (voltage collapse at three specific buses, fed only by long
+  high-reactance lines with no local generation -- partly fixed with series compensation, see
+  [POWER_FLOW.md](POWER_FLOW.md)); the 315kV network fails much more severely and independently of
+  demand level, and that one is still undiagnosed.

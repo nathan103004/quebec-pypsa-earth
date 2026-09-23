@@ -38,6 +38,12 @@ All under `network/`:
   specifically (345 treated as 315-tier, 765 as 735-tier) -- the two voltage tiers this project's
   reduced networks actually keep as topology. This is the most authoritative source available for
   those two tiers, and supersedes the interpolated estimate below wherever it applies.
+- **Series compensation** (`apply_series_compensation.py`) -- not a data source itself, but a
+  modeling choice layered on top of the real data above: 50% series compensation on the ten
+  longest lines feeding the three buses diagnosed as this network's AC PF voltage-collapse points
+  (see [POWER_FLOW.md](POWER_FLOW.md)). Matches real Hydro-Quebec practice on its longest 735kV
+  corridors, but the specific 50% figure is a generic planning assumption, not a measured value for
+  these lines -- see [ASSUMPTIONS_AND_LIMITATIONS.md](ASSUMPTIONS_AND_LIMITATIONS.md).
 - `overhead_line_parameters_by_voltage.csv` -- real 60Hz per-km r/x/b by voltage class (Hypersim/
   EMTP knowledge-base table, Menard 2023), log-log interpolated across voltages by
   `fix_line_reactance_hypersim.py` and applied to every AC line >= 220kV *not* covered by the more

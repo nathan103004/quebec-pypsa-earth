@@ -1,22 +1,22 @@
 # Quebec Transmission Grid Model
 
-A PyPSA model of Quebec's transmission grid: real OpenStreetMap topology, real 2022 Hydro-Québec
+A PyPSA model of Quebec's transmission grid: OpenStreetMap topology, modeled with 2022 Hydro-Québec
 generation and demand data, and a reduction pipeline that produces three networks at different
 levels of detail for different purposes.
 
 ## Quick facts
 
-| | Unreduced | 315kV (main) | 735kV backbone |
+| | Unreduced (Entire Canada) | 315kV (main) | 735kV backbone |
 |---|---|---|---|
-| Buses | 4,013 | 208 | 58 |
+| Buses | 4,013 | 205 | 58 |
 | Lines | 4,546 | 276 | 109 |
-| Generators (real) | 68 | 65 | 27 |
+| Generators (real) | 68 | 65 | 24 |
 | Storage units | 18 | 18 | 10 |
 | Load served | -- | 0% shed | -- |
-| AC power flow | not attempted | 0/168 | 50/168 (**168/168 at 85% of demand**) |
+| AC power flow | not attempted | 0/168 | 85/168 (**168/168 at 62% of demand**) |
 
-The 735kV backbone converges fully once demand is reduced to 85% of its current level -- current
-real demand exceeds its loadability margin. The 315kV network doesn't respond to demand reduction
+The 735kV backbone converges fully once demand is reduced to 62% of its current level.
+The 315kV network doesn't respond to demand reduction
 the same way; see [POWER_FLOW.md](docs/POWER_FLOW.md) for the full investigation.
 
 See [docs/NETWORKS.md](docs/NETWORKS.md) for what each network is for and how they relate.

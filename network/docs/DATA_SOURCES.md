@@ -32,10 +32,24 @@ All under `network/`:
 
 ## Line electrical parameters
 
-- `overhead_line_parameters_by_voltage.csv` -- real per-km resistance/reactance/susceptance by
-  voltage class, used to compute line impedance from length (`n.calculate_dependent_values()`)
-  and, in `reduce_to_735kv.py`, to derive the bridge line's reactance from the 735kV fleet's own
-  real reactance-per-km.
+- `hq_line_characteristics_by_voltage.csv` -- Hydro-Quebec's own real line-characteristics table
+  (transcribed from an HQ planning document), giving exact per-km positive-sequence r/x/b by
+  voltage. Applied by `apply_hq_line_characteristics.py` to 315/345kV and 735/765kV lines
+  specifically (345 treated as 315-tier, 765 as 735-tier) -- the two voltage tiers this project's
+  reduced networks actually keep as topology. This is the most authoritative source available for
+  those two tiers, and supersedes the interpolated estimate below wherever it applies.
+- `overhead_line_parameters_by_voltage.csv` -- real 60Hz per-km r/x/b by voltage class (Hypersim/
+  EMTP knowledge-base table, Menard 2023), log-log interpolated across voltages by
+  `fix_line_reactance_hypersim.py` and applied to every AC line >= 220kV *not* covered by the more
+  specific HQ table above. Also used in `reduce_to_735kv.py` to derive the 735-765kV bridge line's
+  reactance from the 735kV fleet's own real reactance-per-km, and in `st_clair.py`'s thermal
+  (`s_nom`) calculation.
+- Below 220kV: no real reactance data source exists in this project. Lines there still use
+  PyPSA-Earth's generic default type-matching (`config.default.yaml`'s `lines.ac_types`, itself
+  sourced from a German textbook, not Quebec-specific) -- see
+  [ASSUMPTIONS_AND_LIMITATIONS.md](ASSUMPTIONS_AND_LIMITATIONS.md). This doesn't affect the
+  reduced/solved networks' own topology (they only keep >=315kV lines), only the unreduced
+  `elec_full.nc` reference map.
 - `st_clair_curve.csv` -- the St Clair curve (a standard planning-level thermal-limit-vs-length
   relationship for overhead transmission lines), used in `st_clair.py` to derive line thermal
   capacity (`s_nom`) from real length and voltage.

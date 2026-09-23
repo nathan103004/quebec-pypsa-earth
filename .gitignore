@@ -78,6 +78,11 @@ screenlog*
 site/
 !data/industry/ammonia_plants.csv
 
+# Network line-parameter data (script dependencies, not pipeline output -- st_clair.py,
+# fix_line_reactance_hypersim.py, and apply_hq_line_characteristics.py all read these)
+!network/overhead_line_parameters_by_voltage.csv
+!network/hq_line_characteristics_by_voltage.csv
+
 # Network doc map images (referenced from network/docs/*.md)
 !network/quebec_real_network_map.png
 !network/quebec_reduced_network_map.png

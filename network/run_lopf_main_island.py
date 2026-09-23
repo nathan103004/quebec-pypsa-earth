@@ -207,10 +207,19 @@ def main():
     print(f"  Set p_max_pu = uniform_cf(t) * {CEILING_MARGIN:.2f} (clipped at 1.0) on {len(hydro_su)} "
           f"hydro storage units (mean={uniform_cf_recovered.mean().mean():.3f})")
 
-    print("Tripling link 4349's capacity (329-3975 DC tie)...")
-    old_p_nom_4349 = n.links.at["4349", "p_nom"]
-    n.links.at["4349", "p_nom"] = old_p_nom_4349 * 3
-    print(f"  link 4349 p_nom: {old_p_nom_4349:.1f} -> {n.links.at['4349','p_nom']:.1f} MW")
+    # Looked up by bus pair, not the literal id "4349" -- reduce_voltage_network.py's
+    # nearest-bus reassignment isn't fully deterministic run-to-run (ties can break
+    # differently), which can occasionally leave this DC tie's buses outside this
+    # run's largest connected island, changing which ids survive extraction.
+    tie_329_3975 = n.links.index[(n.links.bus0.isin(["329", "3975"])) & (n.links.bus1.isin(["329", "3975"]))]
+    if len(tie_329_3975):
+        tie_id = tie_329_3975[0]
+        old_p_nom = n.links.at[tie_id, "p_nom"]
+        n.links.at[tie_id, "p_nom"] = old_p_nom * 3
+        print(f"Tripling the 329-3975 DC tie's capacity (link '{tie_id}'): "
+              f"{old_p_nom:.1f} -> {n.links.at[tie_id, 'p_nom']:.1f} MW")
+    else:
+        print("329-3975 DC tie not present in this run's largest island -- skipping its capacity fix.")
 
     print("Relaxing lines from the default n-1 security margin (s_max_pu=0.7) to 1.0...")
     n_derated = (n.lines.s_max_pu < 1.0).sum()

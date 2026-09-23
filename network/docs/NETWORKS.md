@@ -17,20 +17,24 @@ Since we are only interested in the Quebec network, the
 
 ## 2. 315kV reduced (`elec_reduced.nc` -> `elec_solved.nc`)
 
-208 buses, 276 lines, 23 transformers, 7 links, 65 real generators, 18 storage units, 729 loads.
+210 buses, 278 lines, 22 transformers, 6 links, 205 buses after largest-island extraction, 276
+lines, 65 real generators (plus per-bus load-shedding placeholders), 18 storage units, 647 loads.
 
 Built by `reduce_voltage_network.py`
 keeps every bus at 315kV or above, and folds every lower-voltage local bus onto its nearest
 surviving bus -- no load, generator, or storage unit is dropped, only reassigned.
 `run_lopf_main_island.py` then extracts the single largest connected island and solves LOPF on it.
 
-This is the main working network: the 2022 dispatch is solved on this network via LOPF. Demand: 32,421 MW mean over the solved week (2022-01-01 to 2022-01-07,
-this is compared against the actual whole-January-2022 system demand). **0% load shed.**
+This is the main working network: the 2022 dispatch is solved on this network via LOPF. Demand:
+~30,200 MW mean over the solved week (2022-01-01 to 2022-01-07, calibrated against real
+whole-January-2022 system demand -- reduce_voltage_network.py's nearest-bus reassignment isn't
+fully deterministic run-to-run, so the exact figure can drift slightly between regenerations).
+**0% load shed.**
 
 This is also the network AC power flow would need to converge on for genuinely representative
 contingency analysis. It does not: **0/168** under full nonlinear AC PF, and unlike the 735kV
-network below, reducing demand doesn't help either (still 0/168 at 85% of current demand) -- its
-failure mode is structurally different and not yet understood. See
+network below, reducing demand doesn't help either (still 0/168 at 100% or less of current demand)
+-- its failure mode is structurally different and not yet understood. See
 [POWER_FLOW.md](POWER_FLOW.md).
 
 ![315kV reduced network -- LOPF congestion, load, shedding, and hydro dispatch](../quebec_reduced_network_map.png)
@@ -45,13 +49,19 @@ way. Note that this network is not rerun with LOPF so that dispatch is still acc
 
 Purpose-built for AC power flow tractability: small and heavily meshed, so it was expected to
 converge more readily than the 315kV network, making it easier to diagnose AC PF divergence. At
-current (100%) demand it does not fully converge (**65/168**) -- see [POWER_FLOW.md](POWER_FLOW.md)
+current (100%) demand it does not fully converge (**85/168**) -- see [POWER_FLOW.md](POWER_FLOW.md)
 for the investigation.
 
-## 4. 735kV backbone, 85% demand (`elec_735kv_scaled85.nc` -> `elec_735kv_scaled85_pf.nc`)
+Line reactance on this network's 315/345kV and 735/765kV lines comes from Hydro-Quebec's own real
+line-characteristics table (`network/hq_line_characteristics_by_voltage.csv`,
+`apply_hq_line_characteristics.py`), not PyPSA-Earth's generic default type -- see
+[DATA_SOURCES.md](DATA_SOURCES.md) for why that mattered (it materially changes AC PF
+convergence).
+
+## 4. 735kV backbone, 62% demand (`elec_735kv_scaled62.nc` -> `elec_735kv_scaled62_pf.nc`)
 
 Same 58 buses, 109 lines, and topology as `elec_735kv.nc` above -- every load and every real
-generator/storage unit's dispatch scaled down by a uniform 0.85 factor (loads and dispatch scaled
+generator/storage unit's dispatch scaled down by a uniform 0.62 factor (loads and dispatch scaled
 together, so total demand still exactly equals total dispatch at every snapshot). Not a
 re-optimized LOPF solve at lower demand -- a controlled sensitivity test, holding the real dispatch
 *pattern* fixed and only scaling its level, to isolate whether demand level alone affects AC PF
@@ -61,5 +71,9 @@ convergence.
 convergence using entirely real topology and real circuit data (no fabricated lines). It confirms
 the current 735kV network's AC PF failure at 100% demand is demand-level-sensitive, though the
 underlying mechanism is still not identified -- see [POWER_FLOW.md](POWER_FLOW.md).
+
+The 62% threshold (found by scanning demand levels in 1% steps) is meaningfully lower than an
+earlier 85% figure found before line reactance was corrected against real Hydro-Quebec data --
+the corrected (larger) reactance genuinely tightens AC PF convergence, it isn't just a relabeling.
 
 ![735kV backbone AC PF results at 85% demand -- voltage deviation, line loading, slack/PV buses](../quebec_735kv_ac_pf_map.png)

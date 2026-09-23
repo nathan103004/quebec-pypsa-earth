@@ -1,0 +1,59 @@
+# Hydro-Quebec "Caracteristiques des lignes" (real HQ line-design/characteristics
+# table by nominal voltage, transcribed from a scanned HQ planning document).
+# 69/120/161/230/315/735 kV. This is HQ's own stated line data, not a generic
+# type-matched or interpolated estimate.
+#
+# Z1/Y1 = positive-sequence series impedance (ohm/km) / shunt susceptance
+# (uS/km); Z0 = zero-sequence series impedance (ohm/km). These three are the
+# electrically relevant columns for network/apply_hq_line_characteristics.py
+# (r_ohm_per_km, xl_ohm_per_km, bc_uS_per_km below); everything else is
+# transcribed for reference/completeness, not currently consumed by any script.
+#
+# Two cells (230 kV Z1 and Z0) are printed with a "-" sign ahead of the
+# reactance in the source scan (e.g. "0,055 - j0,49"), inconsistent with
+# every other cell's "+" and with a normal overhead line's positive series
+# reactance -- almost certainly an OCR/print artifact, not a real negative
+# reactance. Transcribed as-is (r_ohm_per_km positive, xl_ohm_per_km positive
+# -- i.e. treated as a "+" typo) since 230kV isn't used by
+# apply_hq_line_characteristics.py (project only applies 315/735 kV here).
+#
+# Thermal capacity is given in amps at two ambient temperatures, not MVA --
+# not directly usable as PyPSA s_nom without a conversion (s_nom_mva =
+# sqrt(3) * v_nom_kv * i_amp / 1000); not applied by any script currently
+# (s_nom still comes from st_clair.py).
+#
+# Columns:
+#   voltage_kv               - nominal line voltage (kV)
+#   configuration             - monoterne (1 circuit) / biterne (2 circuits) typical tower config
+#   conductor                 - ACSR conductor count x diameter (mm)
+#   phasing_transposition      - phase transposition scheme
+#   operating_temp_c           - conductor operating temperature (C)
+#   thermal_capacity_a_25c     - thermal capacity (A) at the listed warm-weather rating
+#   thermal_capacity_a_cold    - thermal capacity (A) at the listed cold-weather rating
+#   shield_wires_angle         - number of shield/ground wires and protection angle
+#   counterweights             - number of tower counterweights
+#   fault_rate_1_per_100km_yr  - lightning fault rate (faults / 100km-year)
+#   grounding_resistance_ohm   - tower grounding resistance (ohm)
+#   fault_rate_2_per_100km_yr  - second fault-rate figure (faults / 100km-year)
+#   insulators_per_string      - insulator count per string (146x254mm units)
+#   creepage_mm                - insulator creepage distance (mm)
+#   creepage_mm_per_kv         - creepage distance normalized (mm/kV phase-phase)
+#   phase_to_ground_clearance_m - phase-to-structure clearance (m)
+#   ground_clearance_m         - minimum clearance above ground (m)
+#   radio_interference_db      - radio interference at 15m from outer phase (dB/1uV/m)
+#   riv_hardware_uv            - hardware RIV level (uV)
+#   row_width_m                - minimum right-of-way width (m)
+#   zc_ohm                     - characteristic/surge impedance (ohm)
+#   r_ohm_per_km               - Z1 real part, positive-sequence resistance (ohm/km)
+#   xl_ohm_per_km              - Z1 imaginary part, positive-sequence reactance (ohm/km)
+#   bc_uS_per_km               - Y1, positive-sequence shunt susceptance (uS/km)
+#   r0_ohm_per_km              - Z0 real part, zero-sequence resistance (ohm/km)
+#   x0_ohm_per_km              - Z0 imaginary part, zero-sequence reactance (ohm/km)
+#
+voltage_kv,configuration,conductor,phasing_transposition,operating_temp_c,thermal_capacity_a_25c,thermal_capacity_a_cold,shield_wires_angle,counterweights,fault_rate_1_per_100km_yr,grounding_resistance_ohm,fault_rate_2_per_100km_yr,insulators_per_string,creepage_mm,creepage_mm_per_kv,phase_to_ground_clearance_m,ground_clearance_m,radio_interference_db,riv_hardware_uv,row_width_m,zc_ohm,r_ohm_per_km,xl_ohm_per_km,bc_uS_per_km,r0_ohm_per_km,x0_ohm_per_km
+69,monoterne,ACSR 1x27.7,--,95,1100,1500,2/35,1,1,25,2,4,1150,15.9,0.8,5.2,--,--,>=15,350,0.075,0.45,3.7,0.4,1.5
+120,monoterne ou biterne,ACSR 1x27.7,ABC-CBA,95,1150,1500,2/35 1/25,2,4,15,5,7,2000,13.8,1.2,5.5,49,--,>=15,350,0.075,0.45,3.7,0.3,1.6
+161,monoterne ou biterne,ACSR 1x27.7,ABC-CBA,95,1150,1500,2/35 1/25,2,3,15,4,9,2600,15.3,1.5,5.8,49,--,>=15,380,0.075,0.49,3.4,0.4,1.45
+230,biterne,ACSR 1x31.6,ABC-CBA,95,1350,1750,1/25,2,2,15,3,12,3500,14.3,2.0,6.1,53,500,>=20,380,0.055,0.49,3.4,0.3,1.5
+315,biterne,ACSR 2x31.6,ABC-CBA >=90km,95,2700,3500,1/25,2,1,15,1.5,16,4650,14.1,2.3,"6.5/9.0",56,500,30,290,0.028,0.36,4.3,0.25,1.35
+735,monoterne,ACSR 4x35.6,ABC-ABC >=90km,65,4200,6200,2/20,1,0.1,25,0.1,33,10000,13.1,4.3,"14.1/17.5",63,1500,80,260,0.01,0.33,4.9,0.25,1.1

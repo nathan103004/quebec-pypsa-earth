@@ -29,13 +29,14 @@ project without re-deriving everything from scratch.
   3. **735kV reduced** (`elec_735kv.nc`, 58 buses, 109 lines) — a further reduction down to just
      the 735/765kV backbone (`reduce_to_735kv.py`), aggregating everything else onto backbone
      buses by graph shortest-path. Purpose-built for AC PF tractability. At current real demand it
-     converges 65/168 snapshots, but a clean 168/168 at 85% of that demand
-     (`elec_735kv_scaled85.nc`) — a genuine, well-tested but still mechanistically unexplained
+     converges 85/168 snapshots, but a clean 168/168 at 62% of that demand
+     (`elec_735kv_scaled62.nc`) — a genuine, well-tested but still mechanistically unexplained
      finding (see `network/docs/POWER_FLOW.md`).
   4. A copy of the current, verified pipeline outputs (`elec_full.nc`, `elec_reduced.nc`,
-     `elec_solved.nc`, `elec_735kv.nc`, `elec_735kv_scaled85.nc`/`_pf.nc`) is kept in
+     `elec_solved.nc`, `elec_735kv.nc`, `elec_735kv_scaled62.nc`/`_pf.nc`) is kept in
      `network/networks_current/` — use that to know which files in `networks/` are the real
-     current state vs. stale/diagnostic leftovers.
+     current state vs. stale/diagnostic leftovers. Pre-line-reactance-fix originals are backed up
+     in `network/networks_backup_pre_hypersim/`.
 - Full documentation lives under `network/docs/` — read `POWER_FLOW.md` before re-investigating
   anything AC-PF-related; it documents the full elimination history (what's been ruled out) and
   the current best finding.
@@ -114,22 +115,33 @@ project without re-deriving everything from scratch.
    numerically exact against source. Carries over shunt capacitors and a DC-PF-seeded starting
    angle (both were missing and had to be added).
 7. `visualize_real_network_map.py` / `visualize_solved_network_map.py` / `visualize_ac_pf_map.py` /
-   `visualize_congestion_zoom.py` — HTML map outputs (Plotly/Scattermapbox), each purpose-built:
-   full raw network, LOPF+DCPF congestion/dispatch/shedding, AC-PF-specific results (voltage
+   `visualize_congestion_zoom.py` — HTML + PNG map outputs (Plotly/Scattergeo, using Plotly's
+   built-in Natural Earth basemap, not external map tiles — OSM's tile server and Carto's free
+   style both stopped working for this kind of embedded use), each purpose-built: full raw
+   network, LOPF+DCPF congestion/dispatch/shedding, AC-PF-specific results (voltage
    magnitude/angle, diverging color scale), and a zoomed view of the most-congested lines.
 
-## Current state / open threads (as of 2026-09-21)
+## Current state / open threads (as of 2026-09-23)
 
-- **735kV backbone** (`elec_735kv.nc`, 109 real lines): 65/168 at current real demand (32,421 MW
-  mean, calibrated against real whole-January-2022 HQ data), **168/168 at 85% of that demand**
-  (`elec_735kv_scaled85.nc`). An extensive elimination process (reactive compensation,
+- **Line reactance was corrected against real Hydro-Québec data** (`fix_line_reactance_hypersim.py`,
+  `apply_hq_line_characteristics.py`) — every AC line's r/x/b had actually been coming from
+  PyPSA-Earth's generic default type (a German textbook value at 50Hz), never from either of this
+  project's own real-parameter CSVs, which had only ever fed the St Clair thermal (`s_nom`) calc.
+  This materially tightened AC PF convergence (see below) — treat any AC-PF-related finding dated
+  before 2026-09-23 as describing the old, understated-reactance network. Pre-fix networks are
+  backed up in `network/networks_backup_pre_hypersim/`.
+- **735kV backbone** (`elec_735kv.nc`, 109 real lines): 85/168 at current real demand (~30,200 MW
+  mean, calibrated against real whole-January-2022 HQ data), **168/168 at 62% of that demand**
+  (`elec_735kv_scaled62.nc`). An extensive elimination process (reactive compensation,
   single/combined/all-lines reinforcement, continuation power flow, single-PV-bus removal,
   modal/eigenvector analysis) ruled out every localized fix — only reducing total real+reactive
   power everywhere works, meaning the constraint is systemic, not one fixable component. The
-  mechanism is still not identified. `network/quebec_735kv_ac_pf_map.html` is generated from this
-  85%-scaled, fully-converged, all-real-data network (not the retired 115-line one).
-- **315kV full network** (`elec_solved.nc`, 208 buses): 0/168, and unlike the 735kV network,
-  **demand reduction doesn't help at all** (still 0/168 at 85% demand, with far more extreme
+  mechanism is still not identified. That elimination testing predates the reactance fix and
+  hasn't been re-verified against it, though the demand-scale threshold has (85%→62%).
+  `network/quebec_735kv_ac_pf_map.html` is generated from this 62%-scaled, fully-converged,
+  all-real-data network.
+- **315kV full network** (`elec_solved.nc`, 205 buses): 0/168, and unlike the 735kV network,
+  **demand reduction doesn't help at all** (still 0/168 even at 62% demand, with far more extreme
   numerical blowup). This is a structurally different, still-undiagnosed problem — the biggest
   open question in the project.
 - **`reduce_voltage_network.py`'s straight-line reassignment** was replaced with graph

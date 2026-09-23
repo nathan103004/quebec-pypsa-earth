@@ -1,6 +1,6 @@
 # Generators and storage
 
-Fleet composition on the main working network (`elec_solved.nc`, 208 buses). Counts are real
+Fleet composition on the main working network (`elec_solved.nc`, 205 buses). Counts are real
 units after `reduce_voltage_network.py`'s reassignment (none dropped); capacities are nameplate.
 
 | Carrier | Count | Capacity (MW) | Source |

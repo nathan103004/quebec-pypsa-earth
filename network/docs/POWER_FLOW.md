@@ -22,31 +22,16 @@ clean throughout this project on every network tried -- no convergence issues at
 
 ## AC power flow (full nonlinear Newton-Raphson) -- open, unresolved
 
-**Neither reduced network fully converges under AC PF at current real demand.** Current state
-(line reactance corrected against real Hydro-Quebec data, plus series compensation on the
-identified weak corridors -- see the sections below):
+**Neither reduced network fully converges under AC PF at current real demand.** Line parameters
+(r/x/b) come from Hydro-Quebec's own line-characteristics table -- see
+[DATA_SOURCES.md](DATA_SOURCES.md). Current state:
 
 | Network | Convergence at current demand | At reduced demand |
 |---|---|---|
-| 315kV (`elec_solved.nc`, 205 buses) | 0/168 | 0/168 at 82% -- no improvement |
-| 735kV (`elec_735kv.nc`, 58 buses, 109 lines) | 155/168 | **168/168 at 82%** |
+| 315kV (`elec_solved.nc`, 205 buses) | 0/168 | see the 315kV section below |
+| 735kV (`elec_735kv.nc`, 58 buses, 109 lines) | 153/168 | **168/168 at 86%** |
 
-![735kV backbone AC PF results at 82% demand -- voltage deviation, line loading, slack/PV buses](../quebec_735kv_ac_pf_map.png)
-
-**Line reactance correction (2026-09-23):** every line's r/x/b previously came from PyPSA-Earth's
-generic default type (`Al/St 560/50 4-bundle 750.0`, a German textbook value at 50Hz -- see
-[DATA_SOURCES.md](DATA_SOURCES.md)), not from the Hypersim/HQ data already sitting in this
-project's own CSVs, which had only ever been wired into the St Clair thermal (`s_nom`) calculation.
-Fixed via `fix_line_reactance_hypersim.py` (all AC lines >= 220kV, log-log interpolated from the
-Hypersim/EMTP table) and `apply_hq_line_characteristics.py` (315/345kV and 735/765kV lines
-specifically, overridden with Hydro-Quebec's own exact real line-characteristics table). Net
-effect: 735kV line x +19-20%, 315kV line x roughly +36% (compared to the old generic-type default
--- the earlier "-8%" figure documented at one point was only relative to an intermediate
-interpolated estimate, not the true starting point). This **materially tightened** AC PF
-convergence at first -- before the series compensation fix below, the demand level needed for full
-735kV convergence dropped from 85% to 62%, and 100%-demand convergence changed from 50/168 to
-85/168. Treat any AC PF finding from before 2026-09-23 as referring to the old,
-understated-reactance network.
+![735kV backbone AC PF results at 86% demand -- voltage deviation, line loading, slack/PV buses](../quebec_735kv_ac_pf_map.png)
 
 ### Fixing divergence: two components on the 735kV network
 
@@ -57,8 +42,8 @@ collapse, confirmed by Newton-Raphson's Jacobian going exactly singular there, n
 Modeled as `x_new = x * (1 - 0.5)` -- a straight 50% reduction of each line's own reactance.
 Needed because these three buses have no local voltage-controlling generation, so their voltage
 depends entirely on how much drop accumulates over a very long, high-reactance line; cutting that
-reactance directly raises the loadability limit. Result: 100%-demand convergence rose from 85/168
-to 157/168, and the full-convergence demand threshold from 62% to 82%.
+reactance directly raises the loadability limit. Result: 100%-demand convergence rose from 84/168
+to 155/168, and the full-convergence demand level from 62% to 86%.
 
 **Switched shunt reactors** (`add_shunt_reactors.py`) -- a generator with a fixed negative
 `q_set` at 8 buses (469, 310, 3319, 345, 312, 308, 150, 2944), active only when total system demand
@@ -66,18 +51,22 @@ is below that network's own mean (bus 469 is always-on instead, since its voltag
 system demand). Needed because the same long lines' own charging pushes voltage up to 1.13pu under
 *light* load (Ferranti effect) -- the opposite problem from the collapse above, at the opposite end
 of the demand range. Switching (rather than a permanent shunt) matters because buses 308/312 need
-reactive *support* under heavy load from the series compensation fix; a fixed reactor there would
-fight it during exactly the hours it's needed. Result: most affected buses cleared 1.05pu; small
-convergence cost at 100% demand (157/168 -> 155/168), no effect on the 82% full-convergence case.
+reactive *support* under heavy load from the series compensation; a fixed reactor there would
+fight it during exactly the hours it's needed. Result: 469, 308, 150 and 2944 fully cleared 1.05pu,
+345 and 312 dropped to a single snapshot over, and 310 and 3319 roughly halved (snapshots over
+1.05pu: 128 -> 54 and 130 -> 56). Cost: 100%-demand convergence 155/168 -> 153/168; the 86%
+full-convergence level is unchanged.
 
 Both components' sizing (`COMPENSATION_FRACTION = 0.50`, reactor ratings 900-2,500 MVAr) are
 generic, tuned-not-measured assumptions -- see
 [ASSUMPTIONS_AND_LIMITATIONS.md](ASSUMPTIONS_AND_LIMITATIONS.md).
 
-### The 315kV network fails differently
+### The 315kV network
 
-Unlike the 735kV network, reducing demand does **not** help the 315kV network at all (still 0/168
-even at 82% demand, with far more extreme numerical blowup -- hundreds of lines "loaded" past
-absurd percentages). This isn't a loadability-margin problem like the 735kV case; something
-structurally different is going on, and it hasn't been diagnosed.
-
+0/168 under AC PF. One known setup gap: `run_pf.py` doesn't copy the LOPF dispatch into `p_set`
+(which `n.pf()` reads), so on this network every generator, storage unit and link injects zero
+real power in that test and the slack carries the whole ~30 GW load. With the dispatch synced it
+still fails (0/168), and the divergence localizes to two areas: a radial spur of buses 240, 1548,
+1762, 1772, 2207, 3719, 1693, 3836 and 2812 (with it removed, the lowest-demand hour converges),
+and, at higher demand, a wider set of buses that includes 308 and 469 -- also problem buses on the
+735kV network (the shunt reactors exist only in the 735kV file). Root cause not yet found.

@@ -8,8 +8,8 @@ transmission line as a function of line length, expressed as a multiple
 of Surge Impedance Loading (SIL = V^2 / Zc).
 
 Rather than digitizing the original 1953 chart, this reproduces its two
-governing regimes analytically from the line's own R/X/B parameters
-(network/overhead_line_parameters_by_voltage.csv), which is the same
+governing regimes analytically from Hydro-Quebec's own line parameters
+(network/hq_line_characteristics_by_voltage.csv), which is the same
 underlying physics St Clair's curves are a graphical summary of:
 
 - Thermal / short-line plateau: for short lines the limit is conductor
@@ -35,12 +35,13 @@ This is a planning-level estimate for filling in a network's line
 s_nom -- not a substitute for a real thermal or transient-stability
 study.
 
-Reference line parameters (Zc, L, C) are looked up by voltage via
-log-log interpolation over the 5 tabulated levels (230/345/500/765/1100
-kV), so it also covers voltages in between (e.g. Quebec's 735 kV) or
-just outside the table without needing an exact match. A short sanity
-check: this reproduces the standard textbook SIL numbers almost exactly
-(500 kV -> ~1000 MW, 230 kV -> ~140 MW, 765 kV -> ~2275 MW).
+Reference line parameters come from the HQ table's six levels (69/120/161/
+230/315/735 kV): Zc is taken directly from the table; L and C are derived
+from its tabulated positive-sequence reactance and susceptance at 60 Hz
+(L = X / 2*pi*f, C = B / 2*pi*f). 345 kV is treated as the 315 kV row and
+765 kV as the 735 kV row (see TIER_ALIASES); other voltages are
+log-log interpolated between the tabulated levels. Resulting SIL values:
+230 kV -> ~139 MW, 315 kV -> ~342 MW, 735 kV -> ~2078 MW.
 
 Usage
 -----
@@ -60,22 +61,30 @@ import numpy as np
 import pandas as pd
 
 NETWORK_DIR = os.path.dirname(os.path.abspath(__file__))
-DEFAULT_PARAMS_CSV = os.path.join(NETWORK_DIR, "overhead_line_parameters_by_voltage.csv")
+DEFAULT_PARAMS_CSV = os.path.join(NETWORK_DIR, "hq_line_characteristics_by_voltage.csv")
 DEFAULT_CURVE_CSV = os.path.join(NETWORK_DIR, "st_clair_curve.csv")
 
 DEFAULT_DELTA_LIMIT_DEG = 30.0
 DEFAULT_THERMAL_CAP_PU = 3.5
+NOMINAL_FREQ_HZ = 60.0
+
+# Voltages the HQ table has no row for, treated as the nearest tabulated tier.
+TIER_ALIASES = {345.0: 315.0, 765.0: 735.0}
 
 
 def load_line_params(csv_path: str = DEFAULT_PARAMS_CSV) -> pd.DataFrame:
     df = pd.read_csv(csv_path, comment="#").set_index("voltage_kv").sort_index()
+    omega = 2 * np.pi * NOMINAL_FREQ_HZ
+    df["l_mH_per_km"] = df["xl_ohm_per_km"] / omega * 1e3
+    df["c_uF_per_km"] = df["bc_uS_per_km"] / omega
     return df
 
 
 def interpolate_params(voltage_kv: float, ref: pd.DataFrame) -> tuple[float, float, float]:
     """Log-log interpolate (zc_ohm, l_mH_per_km, c_uF_per_km) at voltage_kv
     from the reference table. Warns and flat-extrapolates outside the
-    tabulated range (230-1100 kV)."""
+    tabulated range (69-735 kV)."""
+    voltage_kv = TIER_ALIASES.get(float(voltage_kv), voltage_kv)
     v_ref = ref.index.to_numpy(dtype=float)
     if voltage_kv < v_ref.min() or voltage_kv > v_ref.max():
         warnings.warn(
@@ -154,7 +163,7 @@ def st_clair_s_nom_mva(
 
 
 def make_curve_table(
-    voltages_kv=(230, 345, 500, 735, 765, 1100),
+    voltages_kv=(69, 120, 161, 230, 315, 735),
     lengths_km=(10, 25, 50, 75, 100, 150, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1200, 1500),
     delta_limit_deg: float = DEFAULT_DELTA_LIMIT_DEG,
     thermal_cap_pu: float = DEFAULT_THERMAL_CAP_PU,

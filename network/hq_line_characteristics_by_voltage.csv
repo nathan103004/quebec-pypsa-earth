@@ -4,18 +4,20 @@
 # type-matched or interpolated estimate.
 #
 # Z1/Y1 = positive-sequence series impedance (ohm/km) / shunt susceptance
-# (uS/km); Z0 = zero-sequence series impedance (ohm/km). These three are the
-# electrically relevant columns for network/apply_hq_line_characteristics.py
-# (r_ohm_per_km, xl_ohm_per_km, bc_uS_per_km below); everything else is
-# transcribed for reference/completeness, not currently consumed by any script.
+# (uS/km); Z0 = zero-sequence series impedance (ohm/km). r_ohm_per_km,
+# xl_ohm_per_km and bc_uS_per_km are the columns network/
+# apply_hq_line_characteristics.py writes onto 315/345/735/765 kV lines;
+# network/st_clair.py additionally reads zc_ohm, xl_ohm_per_km and bc_uS_per_km
+# (all rows) for its thermal-limit envelope. Everything else is transcribed
+# for reference/completeness, not consumed by any script.
 #
 # Two cells (230 kV Z1 and Z0) are printed with a "-" sign ahead of the
 # reactance in the source scan (e.g. "0,055 - j0,49"), inconsistent with
 # every other cell's "+" and with a normal overhead line's positive series
 # reactance -- almost certainly an OCR/print artifact, not a real negative
 # reactance. Transcribed as-is (r_ohm_per_km positive, xl_ohm_per_km positive
-# -- i.e. treated as a "+" typo) since 230kV isn't used by
-# apply_hq_line_characteristics.py (project only applies 315/735 kV here).
+# -- i.e. treated as a "+" typo). apply_hq_line_characteristics.py never uses the
+# 230 kV row; st_clair.py does, but only when a line at that voltage is rated.
 #
 # Thermal capacity is given in amps at two ambient temperatures, not MVA --
 # not directly usable as PyPSA s_nom without a conversion (s_nom_mva =

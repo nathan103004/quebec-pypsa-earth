@@ -13,13 +13,13 @@ levels of detail for different purposes.
 | Generators (real) | 68 | 65 | 24 |
 | Storage units | 18 | 18 | 10 |
 | Load served | -- | 0% shed | -- |
-| AC power flow | not attempted | 0/168 | 155/168 (**168/168 at 82% of demand**) |
+| AC power flow | not attempted | 0/168 | 153/168 (**168/168 at 86% of demand**) |
 
-The 735kV backbone converges fully once demand is reduced to 82% of its current level (up from 62%
-before 50% series compensation was added on the three identified weak corridors -- see
-[POWER_FLOW.md](docs/POWER_FLOW.md)). Switched shunt reactors also fix light-load overvoltage at 8
-buses (a separate problem from the collapse fix above). The 315kV network doesn't respond to demand
-reduction the same way; see [POWER_FLOW.md](docs/POWER_FLOW.md) for the full investigation.
+The 735kV backbone converges fully once demand is reduced to 86% of its current level, using
+line parameters from Hydro-Quebec's own table, 50% series compensation on the three identified weak
+corridors, and switched shunt reactors at 8 buses for light-load overvoltage -- see
+[POWER_FLOW.md](docs/POWER_FLOW.md). The 315kV network still fails; see the same file for where the
+divergence localizes.
 
 See [docs/NETWORKS.md](docs/NETWORKS.md) for what each network is for and how they relate.
 

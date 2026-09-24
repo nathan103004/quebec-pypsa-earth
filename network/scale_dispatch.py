@@ -11,7 +11,7 @@ level), not a re-optimized LOPF solve at a different demand level.
 
 Usage
 -----
-    python network/scale_dispatch.py --network networks/elec_735kv.nc --factor 0.67 --output networks/elec_735kv_scaled67.nc
+    python network/scale_dispatch.py --network networks/elec_735kv.nc --factor 0.86 --output networks/elec_735kv_scaled86.nc
 """
 import argparse
 

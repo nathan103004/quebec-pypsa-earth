@@ -29,7 +29,7 @@ DEFAULT_NETWORK = os.path.join(BASE_DIR, "networks", "elec_reduced.nc")
 SOURCES_CSV = os.path.join(NETWORK_DIR, "2022-sources-electricite-quebec.csv")
 
 # St Clair (network/st_clair.py) is a planning-level analytical envelope
-# derived from real Hypersim-sourced line impedance data, not an empirical
+# derived from Hydro-Quebec's own line parameters, not an empirical
 # thermal rating. Applied at LOPF time only as a uniform margin across every
 # line's St-Clair-derived s_nom (in-memory only; saved network files are
 # unaffected).

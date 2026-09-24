@@ -32,10 +32,8 @@ fully deterministic run-to-run, so the exact figure can drift slightly between r
 **0% load shed.**
 
 This is also the network AC power flow would need to converge on for genuinely representative
-contingency analysis. It does not: **0/168** under full nonlinear AC PF, and unlike the 735kV
-network below, reducing demand doesn't help either (still 0/168 at 100% or less of current demand)
--- its failure mode is structurally different and not yet understood. See
-[POWER_FLOW.md](POWER_FLOW.md).
+contingency analysis. It does not: **0/168** under full nonlinear AC PF -- see
+[POWER_FLOW.md](POWER_FLOW.md) for where the divergence localizes and a known setup caveat.
 
 ![315kV reduced network -- LOPF congestion, load, shedding, and hydro dispatch](../quebec_reduced_network_map.png)
 
@@ -49,19 +47,17 @@ way. Note that this network is not rerun with LOPF so that dispatch is still acc
 
 Purpose-built for AC power flow tractability: small and heavily meshed, so it was expected to
 converge more readily than the 315kV network, making it easier to diagnose AC PF divergence. At
-current (100%) demand it does not fully converge (**155/168**) -- see [POWER_FLOW.md](POWER_FLOW.md)
+current (100%) demand it does not fully converge (**153/168**) -- see [POWER_FLOW.md](POWER_FLOW.md)
 for the investigation.
 
-Line reactance on this network's 315/345kV and 735/765kV lines comes from Hydro-Quebec's own real
-line-characteristics table (`network/hq_line_characteristics_by_voltage.csv`,
-`apply_hq_line_characteristics.py`), not PyPSA-Earth's generic default type -- see
-[DATA_SOURCES.md](DATA_SOURCES.md) for why that mattered (it materially changes AC PF
-convergence). 
+Line parameters (r/x/b) on this network's 315/345kV and 735/765kV lines come from Hydro-Quebec's
+own line-characteristics table (`network/hq_line_characteristics_by_voltage.csv`,
+`apply_hq_line_characteristics.py`) -- see [DATA_SOURCES.md](DATA_SOURCES.md).
 
-## 4. 735kV backbone, 82% demand (`elec_735kv_scaled82.nc` -> `elec_735kv_scaled82_pf.nc`)
+## 4. 735kV backbone, 86% demand (`elec_735kv_scaled86.nc` -> `elec_735kv_scaled86_pf.nc`)
 
 Same 58 buses, 109 lines, and topology as `elec_735kv.nc` above -- every load and every real
-generator/storage unit's dispatch scaled down by a uniform 0.82 factor (loads and dispatch scaled
+generator/storage unit's dispatch scaled down by a uniform 0.86 factor (loads and dispatch scaled
 together, so total demand still exactly equals total dispatch at every snapshot). 
 
 **168/168 -- fully converged.** This is the only network in the pipeline that reaches full AC PF

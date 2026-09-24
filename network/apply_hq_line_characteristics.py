@@ -5,14 +5,19 @@ apply_hq_line_characteristics.py
 Overrides r/x/b on 315kV and 735kV-tier AC lines with Hydro-Quebec's own
 real line-characteristics table (network/hq_line_characteristics_by_voltage.csv,
 transcribed from an HQ planning document -- Z1 positive-sequence impedance
-and Y1 susceptance, exact per-voltage values, not interpolated). This is
-more authoritative than the generic Hypersim/EMTP table (already applied by
-fix_line_reactance_hypersim.py) for exactly the two tiers this project's
-reduced networks actually keep as topology: 315kV (the main working
-network's backbone floor) and 735kV (the dedicated AC-PF-tractable
-reduction). 345kV lines are treated as 315kV-tier and 765kV lines as
-735kV-tier (electrically near-identical, same as reduce_to_735kv.py's
-existing 735/765 unification) -- no other voltage levels are touched.
+and Y1 susceptance, exact per-voltage values, not interpolated) for exactly
+the two tiers this project's reduced networks actually keep as topology:
+315kV (the main working network's backbone floor) and 735kV (the dedicated
+AC-PF-tractable reduction). 345kV lines are treated as 315kV-tier and 765kV
+lines as 735kV-tier (electrically near-identical, same as
+reduce_to_735kv.py's existing 735/765 unification). No other voltage level
+is touched -- lines there keep PyPSA-Earth's generic default type.
+
+Each affected line's `type` is cleared after r/x/b are written, so
+PyPSA's apply_line_types() (run inside n.calculate_dependent_values(), which
+every downstream script re-runs) skips it instead of recomputing r/x/b from
+the old generic type; calculate_dependent_values() then only derives
+x_pu/r_pu/b_pu from the r/x/b set here.
 
 Usage
 -----

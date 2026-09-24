@@ -16,9 +16,9 @@ non-voltage-controlling generation. The short (95.8km) 312-310 line is
 deliberately excluded: it isn't part of the long-line problem this is
 fixing.
 
-Applied on top of fix_line_reactance_hypersim.py / apply_hq_line_characteristics.py
-(after either has already set the line's real x -- this just scales it
-down further), and before reduce_voltage_network.py, since these are
+Applied on top of apply_hq_line_characteristics.py (after it has already
+set the line's real x -- this just scales it down further), and before
+reduce_voltage_network.py, since these are
 original OSM line ids that pass through every later reduction stage
 unchanged.
 

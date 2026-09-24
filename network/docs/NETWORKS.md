@@ -56,21 +56,13 @@ Line reactance on this network's 315/345kV and 735/765kV lines comes from Hydro-
 line-characteristics table (`network/hq_line_characteristics_by_voltage.csv`,
 `apply_hq_line_characteristics.py`), not PyPSA-Earth's generic default type -- see
 [DATA_SOURCES.md](DATA_SOURCES.md) for why that mattered (it materially changes AC PF
-convergence). Ten of the longest lines (the ones feeding buses 308, 1291, and 312 -- the only
-three points of AC PF voltage collapse found on this network) also carry 50% series compensation
-(`apply_series_compensation.py`), matching real Hydro-Quebec practice on its longest 735kV
-corridors. Separately, 8 buses carry switched shunt reactors (`add_shunt_reactors.py`) fixing
-light-load overvoltage (up to 1.13pu, the Ferranti effect) -- see [POWER_FLOW.md](POWER_FLOW.md)
-for the diagnosis behind both.
+convergence). 
 
 ## 4. 735kV backbone, 82% demand (`elec_735kv_scaled82.nc` -> `elec_735kv_scaled82_pf.nc`)
 
 Same 58 buses, 109 lines, and topology as `elec_735kv.nc` above -- every load and every real
 generator/storage unit's dispatch scaled down by a uniform 0.82 factor (loads and dispatch scaled
-together, so total demand still exactly equals total dispatch at every snapshot). Not a
-re-optimized LOPF solve at lower demand -- a controlled sensitivity test, holding the real dispatch
-*pattern* fixed and only scaling its level, to isolate whether demand level alone affects AC PF
-convergence.
+together, so total demand still exactly equals total dispatch at every snapshot). 
 
 **168/168 -- fully converged.** This is the only network in the pipeline that reaches full AC PF
 convergence using entirely real topology and real circuit data (no fabricated lines, series
@@ -78,9 +70,3 @@ compensation included). It confirms the current 735kV network's AC PF failure at
 demand-level-sensitive -- see [POWER_FLOW.md](POWER_FLOW.md) for the mechanism (voltage collapse
 at three specific long-line-fed buses, since fixed by series compensation).
 
-The 82% threshold (found by scanning demand levels in 1% steps) improved from 62% once series
-compensation was added on top of the corrected line reactance -- a real physical improvement, not
-a relabeling: it directly reduces the reactance on the specific lines identified as the collapse
-points.
-
-![735kV backbone AC PF results at 82% demand -- voltage deviation, line loading, slack/PV buses](../quebec_735kv_ac_pf_map.png)

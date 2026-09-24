@@ -81,35 +81,3 @@ even at 82% demand, with far more extreme numerical blowup -- hundreds of lines 
 absurd percentages). This isn't a loadability-margin problem like the 735kV case; something
 structurally different is going on, and it hasn't been diagnosed.
 
-### MATPOWER cross-check
-
-**Re-run 2026-09-24 against the fully-corrected network** (real reactance, series compensation,
-shunt reactors). `export_to_matpower.py` exports a single snapshot (a static case format, not a
-time series) to an independent solver -- tested at the easiest (lowest-loaded) snapshot of the
-week for both the 100%-demand and 82%-scaled 735kV networks. **Both converged in MATPOWER**
-(Newton's method, 4 iterations each), confirming PyPSA's own result independently at that hour.
-This is a relaxed test, not a stress test: the snapshot was deliberately chosen as the easiest of
-the week, so it doesn't speak to the snapshots that fail.
-
-| Metric | PyPSA (100%) | MATPOWER (100%) | PyPSA (82%) | MATPOWER (82%) |
-|---|---|---|---|---|
-| Total load P/Q | 23,038.0 / 7,572.2 | 23,038.1 / 7,572.2 (exact match) | 18,891.2 / 6,209.2 | 18,891.2 / 6,209.2 (exact match) |
-| Total generation P | 23,958.3 | 23,882.6 | 19,479.4 | 19,473.3 |
-| Voltage magnitude range | 0.913-1.115 pu | 0.977-1.122 pu | 0.948-1.039 pu | 0.994-1.123 pu |
-| Slack (bus 114) P/Q | 1,618.0 / -2,739.5 | 1,544.4 / -2,095.5 | 1,160.3 / -2,189.6 | 1,155.9 / -2,209.0 |
-| Line losses P | 920.3 MW | 844.5 MW | 588.2 MW | 582.1 MW |
-
-Agreement is much tighter than the earlier cross-check on the old, understated-reactance network --
-notably, the slack reactive power **sign flip** documented before is gone; both solvers now agree
-on sign and are within 5-25% on magnitude everywhere, closest at 82% demand (P losses within 1%,
-slack P within 0.4%, slack Q within 1%). This is consistent with the earlier divergence having been
-partly an artifact of the old export's understated line reactance, not purely a reactive-power
-formulation difference between solvers.
-
-### Generic assumptions used only for AC PF
-
-AC power flow needs reactive power data the LOPF/DC stages don't model. `run_pf.py` fills this in
-with generic, documented assumptions at the point they're introduced -- see
-[ASSUMPTIONS_AND_LIMITATIONS.md](ASSUMPTIONS_AND_LIMITATIONS.md) for the full list (load and
-generator power factors, transformer X/R ratio, PV/PQ classification thresholds, and the current
-demand-following reactive-compensation model).

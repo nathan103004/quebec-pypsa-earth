@@ -34,7 +34,7 @@ project without re-deriving everything from scratch.
      three specific buses, fixed with series compensation on their feeding lines; see
      `network/docs/POWER_FLOW.md`).
   4. A copy of the current, verified pipeline outputs (`elec_full.nc`, `elec_reduced.nc`,
-     `elec_solved.nc`, `elec_735kv.nc`, `elec_735kv_scaled82.nc`/`_pf.nc`) is kept in
+     `elec_solved.nc`, `elec_735kv.nc`/`_pf.nc`, `elec_735kv_scaled82.nc`/`_pf.nc`) is kept in
      `network/networks_current/` — use that to know which files in `networks/` are the real
      current state vs. stale/diagnostic leftovers. Pre-line-reactance-fix originals are backed up
      in `network/networks_backup_pre_hypersim/`.
@@ -177,9 +177,11 @@ project without re-deriving everything from scratch.
   Peninsula case) but is a much larger-scope change at this stage (~4,000-bus raw graph, ~350
   reassignments) than at the 735kV stage, and empirically hurts AC PF convergence rather than
   helping — do not re-apply without re-testing.
-- **MATPOWER cross-check**: an earlier exported network did NOT converge in MATPOWER's `runpf()`,
-  despite a numerically-exact export (DC PF branch flows matched PyPSA to the decimal). Seven
-  hypotheses tested and ruled out. Not re-attempted against the current 109-line network.
+- **MATPOWER cross-check**: an earlier exported network (the retired 115-line topology, before the
+  current 109-line one) did NOT converge in MATPOWER's `runpf()`, despite a numerically-exact
+  export. Re-run 2026-09-24 against the current, fully-corrected 109-line network -- converges
+  cleanly at both 100% and 82% demand, with much tighter PyPSA/MATPOWER agreement than any earlier
+  attempt (the earlier reactive-power sign flip is gone). See `network/docs/POWER_FLOW.md`.
 
 ## Working conventions established in this project
 

@@ -117,12 +117,13 @@ def main():
     lines = n.lines[n.lines.bus0.isin(main_ac) & n.lines.bus1.isin(main_ac)]
     trafos = n.transformers[n.transformers.bus0.isin(main_ac) & n.transformers.bus1.isin(main_ac)]
     # Exclude load-shedding placeholders (not real capacity) and reactive-
-    # compensation placeholders (p=0 always, and Qg is exported as 0 below --
-    # see docstring -- so they'd inject nothing anyway; excluding them makes
-    # that explicit instead of leaving dead rows in the case).
+    # compensation / shunt-reactor placeholders (p=0 always, and Qg is
+    # exported as 0 below -- see docstring -- so they'd inject nothing
+    # anyway; excluding them makes that explicit instead of leaving dead
+    # rows in the case).
     gens = n.generators[
         (n.generators.bus.isin(main_ac))
-        & (~n.generators.carrier.isin(["load_shedding", "reactive_compensation"]))
+        & (~n.generators.carrier.isin(["load_shedding", "reactive_compensation", "shunt_reactor"]))
     ]
     sus = n.storage_units[n.storage_units.bus.isin(main_ac)]
     loads = n.loads[n.loads.bus.isin(main_ac)]

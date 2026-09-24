@@ -49,7 +49,7 @@ way. Note that this network is not rerun with LOPF so that dispatch is still acc
 
 Purpose-built for AC power flow tractability: small and heavily meshed, so it was expected to
 converge more readily than the 315kV network, making it easier to diagnose AC PF divergence. At
-current (100%) demand it does not fully converge (**157/168**) -- see [POWER_FLOW.md](POWER_FLOW.md)
+current (100%) demand it does not fully converge (**155/168**) -- see [POWER_FLOW.md](POWER_FLOW.md)
 for the investigation.
 
 Line reactance on this network's 315/345kV and 735/765kV lines comes from Hydro-Quebec's own real
@@ -59,7 +59,9 @@ line-characteristics table (`network/hq_line_characteristics_by_voltage.csv`,
 convergence). Ten of the longest lines (the ones feeding buses 308, 1291, and 312 -- the only
 three points of AC PF voltage collapse found on this network) also carry 50% series compensation
 (`apply_series_compensation.py`), matching real Hydro-Quebec practice on its longest 735kV
-corridors -- see [POWER_FLOW.md](POWER_FLOW.md) for the diagnosis behind that choice.
+corridors. Separately, 8 buses carry switched shunt reactors (`add_shunt_reactors.py`) fixing
+light-load overvoltage (up to 1.13pu, the Ferranti effect) -- see [POWER_FLOW.md](POWER_FLOW.md)
+for the diagnosis behind both.
 
 ## 4. 735kV backbone, 82% demand (`elec_735kv_scaled82.nc` -> `elec_735kv_scaled82_pf.nc`)
 

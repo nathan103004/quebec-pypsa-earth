@@ -44,6 +44,10 @@ All under `network/`:
   (see [POWER_FLOW.md](POWER_FLOW.md)). Matches real Hydro-Quebec practice on its longest 735kV
   corridors, but the specific 50% figure is a generic planning assumption, not a measured value for
   these lines -- see [ASSUMPTIONS_AND_LIMITATIONS.md](ASSUMPTIONS_AND_LIMITATIONS.md).
+- **Switched shunt reactors** (`add_shunt_reactors.py`) -- also not a data source, a modeling
+  choice fixing the separate light-load overvoltage problem at 8 buses (see
+  [POWER_FLOW.md](POWER_FLOW.md)). Ratings are tuned empirically, not measured HQ values -- see
+  [ASSUMPTIONS_AND_LIMITATIONS.md](ASSUMPTIONS_AND_LIMITATIONS.md).
 - `overhead_line_parameters_by_voltage.csv` -- real 60Hz per-km r/x/b by voltage class (Hypersim/
   EMTP knowledge-base table, Menard 2023), log-log interpolated across voltages by
   `fix_line_reactance_hypersim.py` and applied to every AC line >= 220kV *not* covered by the more

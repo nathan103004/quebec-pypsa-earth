@@ -122,7 +122,7 @@ project without re-deriving everything from scratch.
    network, LOPF+DCPF congestion/dispatch/shedding, AC-PF-specific results (voltage
    magnitude/angle, diverging color scale), and a zoomed view of the most-congested lines.
 
-## Current state / open threads (as of 2026-09-23)
+## Current state / open threads (as of 2026-09-24)
 
 - **Line reactance was corrected against real Hydro-Québec data** (`fix_line_reactance_hypersim.py`,
   `apply_hq_line_characteristics.py`) — every AC line's r/x/b had actually been coming from
@@ -145,11 +145,22 @@ project without re-deriving everything from scratch.
   corridors. A synchronous-condenser (PV bus) approach was tried first and reached 151/168 at 100%
   demand; series compensation reached **157/168** and is more realistic for this specific failure
   mode (it treats the actual cause, line reactance, rather than adding a device to work around it).
-- **735kV backbone** (`elec_735kv.nc`, 109 real lines): 157/168 at current real demand (~30,200 MW
+- **Fix: switched shunt reactors at 8 buses for light-load overvoltage**
+  (`add_shunt_reactors.py`) — a separate problem from the collapse above: long lines' own charging
+  generates excess reactive power under light load (Ferranti effect), pushing voltage up to 1.13pu.
+  Modeled as a generator with fixed negative `q_set`, active only when demand is below that
+  network's own mean (buses 308/312 need reactive *support* under heavy load, from the series
+  compensation fix, so a permanently-on reactor there would fight it — switching avoids that). Bus
+  469 runs permanently on instead, since its voltage barely correlates with system demand at all.
+  Result: 345/312/308/2944 fully cleared 1.05pu, 150 nearly cleared, 310/3319 improved
+  substantially but not fully (further tuning stopped helping and started costing convergence).
+  Cost: 100%-demand convergence dropped slightly (157/168 → 155/168); the 82% full-convergence
+  threshold is unaffected.
+- **735kV backbone** (`elec_735kv.nc`, 109 real lines): 155/168 at current real demand (~30,200 MW
   mean, calibrated against real whole-January-2022 HQ data), **168/168 at 82% of that demand**
-  (`elec_735kv_scaled82.nc`, up from 62% before series compensation). The remaining 11 failures at
-  100% demand are the week's highest-demand hours — continuation power flow suggests a genuine
-  active-power/angle-stability limit there, not a reactive-support gap; not yet investigated
+  (`elec_735kv_scaled82.nc`, up from 62% before series compensation). The remaining ~13 failures at
+  100% demand are mostly the week's highest-demand hours — continuation power flow suggests a
+  genuine active-power/angle-stability limit there, not a reactive-support gap; not yet investigated
   further. The earlier elimination process (reactive compensation, single/combined/all-lines
   *thermal* reinforcement, modal/eigenvector analysis) that found no localized fix worked was
   testing a different kind of intervention (capacity, not reactance) on the old, understated-

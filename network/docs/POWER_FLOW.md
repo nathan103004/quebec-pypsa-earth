@@ -29,7 +29,7 @@ identified weak corridors -- see the sections below):
 | Network | Convergence at current demand | At reduced demand |
 |---|---|---|
 | 315kV (`elec_solved.nc`, 205 buses) | 0/168 | 0/168 at 82% -- no improvement |
-| 735kV (`elec_735kv.nc`, 58 buses, 109 lines) | 157/168 | **168/168 at 82%** |
+| 735kV (`elec_735kv.nc`, 58 buses, 109 lines) | 155/168 | **168/168 at 82%** |
 
 ![735kV backbone AC PF results at 82% demand -- voltage deviation, line loading, slack/PV buses](../quebec_735kv_ac_pf_map.png)
 
@@ -88,10 +88,34 @@ device to work around it. `COMPENSATION_FRACTION = 0.50` is a generic planning-l
 (real EHV series compensation typically runs 30-70%), not a measured Hydro-Quebec figure for these
 specific lines -- see [ASSUMPTIONS_AND_LIMITATIONS.md](ASSUMPTIONS_AND_LIMITATIONS.md).
 
-The remaining 11 failures (at 100% demand, post-compensation) are the week's highest-demand hours
-(30,400-36,564 MW) -- continuation power flow on the hardest of these shows a true collapse point
-around 78-86% demand even with compensation, suggesting a genuine active-power/angle-stability
+The remaining 13 failures (at 100% demand, post-compensation) are mostly the week's highest-demand
+hours (30,400-36,564 MW) -- continuation power flow on the hardest of these shows a true collapse
+point around 78-86% demand even with compensation, suggesting a genuine active-power/angle-stability
 limit rather than a reactive-support gap. Not yet investigated further.
+
+### Light-load overvoltage -- switched shunt reactors
+
+Separately from the collapse issue (which is a heavy-load problem), several buses showed
+overvoltage up to 1.13pu specifically under **light** load -- the Ferranti effect: these same long
+lines' own shunt charging generates more reactive power than a lightly-loaded system can absorb.
+8 buses were affected (469, 310, 3319, 345, 312, 308, 150, 2944), with voltage exceeding 1.05pu
+in up to 158/168 snapshots. Fixed with `add_shunt_reactors.py`: a generator with a fixed negative
+`q_set`, active only when total system demand is below that network's own mean (a **switched**
+shunt reactor, not permanent) -- because buses 308 and 312 need reactive *support* under heavy load
+(the collapse fix above) but *absorption* under light load; a permanently-on reactor there would
+fight the collapse fix during exactly the hours it's needed. Bus 469 is the one exception: its
+voltage barely correlates with system-wide demand (chronically ~1.125pu all week, unlike the
+others' clear light-load pattern), so it runs permanently on instead of switched.
+
+Result (on the 155 snapshots that converge both before and after): 345, 312, 308, and 2944 fully
+cleared 1.05pu; 469 dropped from 1.125pu (155/155 snapshots over) to 1.016pu (0 over); 150 nearly
+cleared (1 remaining instance); 310 and 3319 improved substantially but not fully (over-1.05 count
+roughly halved, 109->35 and 112->38) -- pushing their reactor rating further caused new convergence
+failures without further voltage improvement, so their fix is partial. Reactor ratings (900-2,500
+MVAr depending on bus) were tuned empirically against this project's own AC PF runs, not derived
+from a target-voltage solve -- see [ASSUMPTIONS_AND_LIMITATIONS.md](ASSUMPTIONS_AND_LIMITATIONS.md).
+Convergence at 100% demand dropped slightly as a side effect (157/168 -> 155/168); the 82%
+full-convergence threshold is unaffected (still 168/168 with reactors included).
 
 ### What's been ruled out on the 735kV network (pre-reactance-fix testing)
 

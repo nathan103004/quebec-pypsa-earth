@@ -74,24 +74,46 @@ reduction.
 
 ## Running it
 
-Requires the `pypsa-earth` conda environment (`envs/environment.yaml` at the repo root, PyPSA
-0.30.x; newer PyPSA releases removed APIs these scripts use, such as `mremove`). Every script
-defaults to `network/networks_current/`. From the repo root:
+Setup (PyPSA 0.30.x; newer PyPSA releases removed APIs these scripts use, such as `mremove`):
 
 ```
+git clone git@github.com:nathan103004/quebec-pypsa-earth.git
+cd quebec-pypsa-earth
+conda env create -f envs/environment.yaml
+conda activate pypsa-earth
+```
+
+Every script defaults to `network/networks_current/`, which holds the networks and starts from
+`elec_reduced.nc`. From the repo root, with the AC PF result each step should print:
+
+```
+# 315kV LOPF (0% shed) and DC power flow check
 python network/run_lopf_main_island.py --network network/networks_current/elec_reduced.nc --output network/networks_current/elec_solved.nc
 python network/run_pf.py --network network/networks_current/elec_solved.nc --method lpf
+
+# Reduce to 735kV -> AC PF 89/168
 python network/reduce_to_735kv.py
 python network/run_pf.py --network network/networks_current/elec_735kv.nc --method pf --pv-min-capacity 0 --pv-max-load-ratio 1
+
+# Circuit-count correction -> AC PF 110/168
 python network/correct_sending_end_circuits.py --network network/networks_current/elec_735kv.nc --in-place
+python network/run_pf.py --network network/networks_current/elec_735kv.nc --method pf --pv-min-capacity 0 --pv-max-load-ratio 1
+
+# 70% series compensation -> AC PF 168/168, 0.904-1.123 pu
 python network/apply_series_compensation.py --network network/networks_current/elec_735kv.nc --in-place
 python network/run_pf.py --network network/networks_current/elec_735kv.nc --method pf --pv-min-capacity 0 --pv-max-load-ratio 1
+
+# Shunt reactors and capacitors -> AC PF 168/168, 0.966-1.059 pu
 python network/add_shunt_impedance.py --network network/networks_current/elec_735kv.nc --output network/networks_current/elec_735kv_shunt.nc
 python network/run_pf.py --network network/networks_current/elec_735kv_shunt.nc --method pf --pv-min-capacity 0 --pv-max-load-ratio 1
+
+# Comparison table of the three reactive-support cases
 python network/summarize_735kv_acpf.py
 ```
 
-`run_pf.py` writes its result next to its input as `*_lpf.nc` / `*_pf.nc`.
+`run_pf.py` prints "N / 168 snapshots fully converged" and the voltage range, and writes its result
+next to its input as `*_lpf.nc` / `*_pf.nc`. The steps overwrite files in `networks_current/`;
+`git checkout network/networks_current/` restores the committed versions.
 
 Outputs:
 

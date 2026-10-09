@@ -1,0 +1,71 @@
+# Source: Hydro-Quebec official website, "Hydroelectric generating stations"
+# (production/generating-stations page). Last update per source: January 1st, 2026.
+# This is HQ's OWN run-of-river/reservoir classification -- authoritative,
+# unlike the "Technology" field borrowed from resources/powerplants.csv
+# (a third-party powerplantmatching database) that attach_real_generators.py
+# used previously. Use this to verify/replace that inference.
+#
+# Columns: name,watershed,river,type,capacity_mw,units,head_m,commissioning
+name,watershed,river,type,capacity_mw,units,head_m,commissioning
+Beauharnois,St. Lawrence River,Lac Saint-Francois and canal de Beauharnois,Run-of-river,1864,36,24.39,1932-1961
+Beaumont,Saint-Maurice,Saint-Maurice,Run-of-river,270,6,37.8,1958-1959
+Bernard-Landry (Eastmain-1-A),La Grande,Eastmain,Reservoir,768,3,63,2011-2012
+Bersimis-1,Betsiamites,Betsiamites,Reservoir,1125,8,266.7,1956-1959
+Bersimis-2,Betsiamites,Betsiamites,Run-of-river,845,5,115.83,1959-1960
+Brisay,La Grande,Caniapiscau,Reservoir,469,2,37.5,1993
+Bryson,Outaouais (lower),Outaouais,Run-of-river,68,3,18.29,1925-1949
+Carillon,Outaouais (lower),Outaouais,Run-of-river,762,14,17.99,1962-1964
+Chelsea,Outaouais (lower),Gatineau,Run-of-river,144,5,28.35,1927-1939
+Chute-Allard,Saint-Maurice,Saint-Maurice,Run-of-river,62,6,17.83,2008-2009
+Chute-Bell,Outaouais (lower),Rouge,Run-of-river,10,2,17.8,1915-2011
+Chute-des-Chats,Outaouais (lower),Outaouais,Run-of-river,92,4,16.16,1931
+Chute-Hemmings,Saint-Francois,Saint-Francois,Run-of-river,29,6,14.64,1925
+Drummondville,Saint-Francois,Saint-Francois,Run-of-river,16,4,9.1,1919-1925
+Eastmain-1,La Grande,Eastmain,Reservoir,480,3,63,2006
+Hart-Jaune,Manicouagan,Hart-Jaune,Reservoir,51,3,39.6,1960
+Jean-Lesage (Manic-2),Manicouagan,Manicouagan,Run-of-river,1229,8,70.11,1965-1967
+La Gabelle,Saint-Maurice,Saint-Maurice,Run-of-river,124,5,17.38,1924-1931
+La Grande-1,La Grande,Grande Riviere,Run-of-river,1436,12,27.5,1994-1995
+La Grande-2-A,La Grande,Grande Riviere,Reservoir,2106,6,138.5,1991-1992
+La Grande-3,La Grande,Grande Riviere,Reservoir,2417,12,79,1982-1984
+La Grande-4,La Grande,Grande Riviere,Reservoir,2779,9,116.7,1984-1986
+La Tuque,Saint-Maurice,Saint-Maurice,Run-of-river,287,6,34.75,1940-1955
+Lac-Robertson,Veco,Veco,Reservoir,22,2,38.5,1995
+Laforge-1,La Grande,Laforge,Reservoir,878,6,57.3,1993-1994
+Laforge-2,La Grande,Laforge,Run-of-river,319,2,27.4,1996
+Les Cedres,St. Lawrence River,Saint-Laurent,Run-of-river,113,12,9.14,1914-1924
+Manic-1,Manicouagan,Manicouagan,Run-of-river,184,3,36.58,1966-1967
+Manic-5,Manicouagan,Manicouagan,Reservoir,1596,8,141.8,1970-1971
+Manic-5-PA,Manicouagan,Manicouagan,Reservoir,1064,4,144.5,1989-1990
+McCormick,Manicouagan,Manicouagan,Run-of-river,235,7,37.8,1952
+Mercier,Outaouais (lower),Gatineau,Reservoir,55,5,18,2007
+Mitis-1,Mitis,Mitis,Run-of-river,6,2,36.58,1922-1929
+Mitis-2,Mitis,Mitis,Run-of-river,4,1,22.86,1947
+Outardes-2,Aux Outardes,Aux Outardes,Run-of-river,523,3,82.3,1978
+Outardes-3,Aux Outardes,Aux Outardes,Run-of-river,1026,4,143.57,1969
+Outardes-4,Aux Outardes,Aux Outardes,Reservoir,785,4,120.55,1969
+Paugan,Outaouais (lower),Gatineau,Run-of-river,216,8,40.54,1928-1956
+Premiere-Chute,Outaouais (upper),Outaouais,Run-of-river,124,4,22.26,1968-1975
+Peribonka,Peribonka,Peribonka,Run-of-river,385,3,67.6,2007-2008
+Rapide-2,Outaouais (upper),Outaouais,Run-of-river,61,4,20.43,1954-1964
+Rapide-7,Outaouais (upper),Outaouais,Reservoir,61,4,20.73,1941-1949
+Rapide-Blanc,Saint-Maurice,Saint-Maurice,Reservoir,217,6,32.92,1934-1955
+Rapide-des-Coeurs,Saint-Maurice,Saint-Maurice,Run-of-river,76,6,22.69,2008-2009
+Rapides-des-Quinze,Outaouais (upper),Outaouais,Run-of-river,111,6,25.9,1923-1955
+Rapides-des-Iles,Outaouais (upper),Outaouais,Run-of-river,176,4,26.22,1966-1973
+Rapides-Farmer,Outaouais (lower),Gatineau,Run-of-river,98,5,20.12,1927-1947
+Rene-Levesque (Manic-3),Manicouagan,Manicouagan,Run-of-river,1326,6,94.19,1975-1976
+Riviere-des-Prairies,St. Lawrence River,Riviere-des-Prairies,Run-of-river,54,6,7.93,1929-1930
+Robert-Bourassa,La Grande,Grande Riviere,Reservoir,5616,16,137.16,1979-1981
+Rocher-de-Grand-Mere,Saint-Maurice,Saint-Maurice,Run-of-river,230,3,24.3,2004
+Romaine-1,Romaine,Romaine,Run-of-river,270,2,61.5,2015
+Romaine-2,Romaine,Romaine,Reservoir,640,2,156,2014
+Romaine-3,Romaine,Romaine,Reservoir,395,2,119,2017
+Romaine-4,Romaine,Romaine,Reservoir,245,2,88.54,2022
+Sainte-Marguerite-3,Sainte-Marguerite,Sainte-Marguerite,Reservoir,882,2,330,2003
+Sarcelle,La Grande,Eastmain,Run-of-river,150,3,"8.7 to 16.1",2013
+Sept-Chutes,Sainte-Anne,Sainte-Anne,Run-of-river,22,4,124.97,1916-1999
+Shawinigan-2,Saint-Maurice,Saint-Maurice,Run-of-river,200,8,44.2,1911-1929
+Shawinigan-3,Saint-Maurice,Saint-Maurice,Run-of-river,184,3,44.2,1948-1949
+Toulnustouc,Manicouagan,Toulnustouc,Reservoir,526,2,152,2005
+Trenche,Saint-Maurice,Saint-Maurice,Run-of-river,302,6,48.47,1950-1955

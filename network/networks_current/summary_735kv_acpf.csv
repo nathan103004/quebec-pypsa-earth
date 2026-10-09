@@ -1,0 +1,17 @@
+,No reactive support,Series compensation,Series compensation + shunts
+Converged,110/168,168/168,168/168
+Voltage range (pu),0.791-1.152,0.904-1.123,0.966-1.059
+Shunt capacitors (MVAr),-,-,"5 (+3,769)"
+Shunt reactors (MVAr),-,-,"11 (-6,106)"
+Under 0.95: buses,23,14,0
+Under 0.95: hours,68,101,0
+Under 0.95: worst hours of day,"15,14,13,05","17,08,16,18",-
+Under 0.95: demand (GW),26.7-32.4,28.3-35.0,-
+Over 1.05: buses,17,14,15
+Over 1.05: hours,110,168,16
+Over 1.05: worst hours of day,"01,00,02,03","00,02,03,01","00,01,02,03"
+Over 1.05: demand (GW),22.0-32.4,22.0-35.0,22.0-29.1
+Largest line angle (deg),50.2,25.0,25.1
+Lines > 30 deg,13,0,0
+Max loading P (%),38.9,60.6,60.5
+Max loading S (%),39.0,60.6,60.6

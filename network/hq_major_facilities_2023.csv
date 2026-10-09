@@ -1,0 +1,87 @@
+# Source: Hydro-Quebec Annual Report 2023, pp.88-89 ("Our generating,
+# transmission and distribution facilities" / "Our major facilities" map).
+# network/hydro-quebec-major-facilities.pdf
+#
+# Caveat: figures are as reported for fiscal year 2023, not 2022 -- a few
+# units (e.g. Romaine-4 commissioned 2021, Sarcelle commissioned 2022-2023)
+# may not exactly match the 2022 in-service fleet used elsewhere in this
+# project. Cross-check newest/smallest units if exact 2022 capacity matters.
+#
+# lat/lon are left blank on purpose -- not given in the PDF (map is
+# stylized, no coordinate grid). Fill via a geocoding pass later (e.g.
+# Nominatim search on "<name> generating station, Quebec, Canada") before
+# assigning these to network buses.
+#
+# type legend:
+#   hydro                  - named Hydro-Quebec-owned hydro station
+#   hydro_aggregate        - unitemized group of small HQ-owned hydro stations
+#   hydro_ipp_aggregate    - unitemized group of IPP-owned hydro stations (PPA)
+#   hydro_ppa_named        - named hydro station under long-term PPA, not HQ-owned
+#   thermal_gas            - gas turbine
+#   thermal_diesel_aggregate - unitemized off-grid diesel plants
+#   solar                  - named photovoltaic station
+#   wind_ipp_aggregate     - unitemized group of IPP-owned wind farms (PPA)
+#   biomass_biogas_ipp_aggregate - unitemized group of IPP biomass/biogas cogen plants (PPA)
+#   other_ipp_aggregate    - unitemized "other" PPA supply
+#   hydro_us_subsidiary    - Great River Hydro (US, wholly-owned HQ subsidiary)
+#   hydro_us_joint         - US hydro jointly owned with Innergex
+#
+name,capacity_mw,unit_count,type,operator,province,in_quebec_grid,lat,lon,notes
+Robert-Bourassa,5616,1,hydro,Hydro-Quebec,QC,True,,,
+La Grande-4,2779,1,hydro,Hydro-Quebec,QC,True,,,
+La Grande-3,2417,1,hydro,Hydro-Quebec,QC,True,,,
+La Grande-2-A,2106,1,hydro,Hydro-Quebec,QC,True,,,
+Beauharnois,1864,1,hydro,Hydro-Quebec,QC,True,,,
+Manic-5,1596,1,hydro,Hydro-Quebec,QC,True,,,
+La Grande-1,1436,1,hydro,Hydro-Quebec,QC,True,,,
+Rene-Levesque,1326,1,hydro,Hydro-Quebec,QC,True,,,
+Jean-Lesage,1229,1,hydro,Hydro-Quebec,QC,True,,,
+Bersimis-1,1178,1,hydro,Hydro-Quebec,QC,True,,,
+Manic-5-PA,1064,1,hydro,Hydro-Quebec,QC,True,,,
+Outardes-3,1026,1,hydro,Hydro-Quebec,QC,True,,,
+Sainte-Marguerite-3,882,1,hydro,Hydro-Quebec,QC,True,,,
+Laforge-1,878,1,hydro,Hydro-Quebec,QC,True,,,
+Bersimis-2,845,1,hydro,Hydro-Quebec,QC,True,,,
+Outardes-4,785,1,hydro,Hydro-Quebec,QC,True,,,
+Bernard-Landry,768,1,hydro,Hydro-Quebec,QC,True,,,
+Carillon,756,1,hydro,Hydro-Quebec,QC,True,,,
+Romaine-2,640,1,hydro,Hydro-Quebec,QC,True,,,
+Toulnustouc,526,1,hydro,Hydro-Quebec,QC,True,,,
+Outardes-2,523,1,hydro,Hydro-Quebec,QC,True,,,
+Eastmain-1,480,1,hydro,Hydro-Quebec,QC,True,,,
+Brisay,469,1,hydro,Hydro-Quebec,QC,True,,,
+Romaine-3,395,1,hydro,Hydro-Quebec,QC,True,,,
+Peribonka,385,1,hydro,Hydro-Quebec,QC,True,,,
+Laforge-2,319,1,hydro,Hydro-Quebec,QC,True,,,
+Trenche,302,1,hydro,Hydro-Quebec,QC,True,,,
+La Tuque,294,1,hydro,Hydro-Quebec,QC,True,,,
+Romaine-1,270,1,hydro,Hydro-Quebec,QC,True,,,
+Beaumont,270,1,hydro,Hydro-Quebec,QC,True,,,
+Romaine-4,245,1,hydro,Hydro-Quebec,QC,True,,,
+McCormick,235,1,hydro,Hydro-Quebec,QC,True,,,
+Rocher-de-Grand-Mere,230,1,hydro,Hydro-Quebec,QC,True,,,
+Paugan,216,1,hydro,Hydro-Quebec,QC,True,,,
+Rapide-Blanc,211,1,hydro,Hydro-Quebec,QC,True,,,
+Shawinigan-2,200,1,hydro,Hydro-Quebec,QC,True,,,
+Shawinigan-3,194,1,hydro,Hydro-Quebec,QC,True,,,
+Manic-1,184,1,hydro,Hydro-Quebec,QC,True,,,
+Rapides-des-Iles,176,1,hydro,Hydro-Quebec,QC,True,,,
+Chelsea,152,1,hydro,Hydro-Quebec,QC,True,,,
+Sarcelle,150,1,hydro,Hydro-Quebec,QC,True,,,commissioned 2022-2023; may not be fully in-service for a 2022 snapshot
+La Gabelle,131,1,hydro,Hydro-Quebec,QC,True,,,
+Premiere-Chute,131,1,hydro,Hydro-Quebec,QC,True,,,
+Les Cedres,113,1,hydro,Hydro-Quebec,QC,True,,,
+Rapides-des-Quinze,109,1,hydro,Hydro-Quebec,QC,True,,,
+Rapides-Farmer,104,1,hydro,Hydro-Quebec,QC,True,,,
+Other small HQ hydro stations (<100 MW each),680,16,hydro_aggregate,Hydro-Quebec,QC,True,,,unitemized in source; 16 stations
+Churchill Falls,5428,1,hydro_ppa_named,CF(L)Co (PPA to Hydro-Quebec until 2041),NL,False,53.578,-64.464,"In Labrador (Newfoundland & Labrador), NOT Quebec -- outside the CA.QC GADM boundary. Physically connected to the Hydro-Quebec grid via CF(L)Co's own 735-kV lines running into Quebec (toward the Manicouagan/Micoua/Montagnais area). The PyPSA-Earth OSM-derived base network likely drops this station and/or the interconnecting 735-kV line since OSM coverage of that specific tie is incomplete -- must be added manually as a bus (in NL, near Churchill Falls) + a 735-kV line into the Quebec grid + a generator, rather than relying on the automated build. lat/lon is the town of Churchill Falls, NL (approximate, not the exact powerhouse)."
+IPP hydro stations (unitemized),706,55,hydro_ipp_aggregate,Independent Power Producers (PPA -- HQ purchases all output),QC,True,,,unitemized in source
+Great River Hydro stations (US subsidiary),589,13,hydro_us_subsidiary,Hydro-Quebec (via Great River Hydro; wholly owned),US,False,,,unitemized in source; located in New England; not part of the QC grid
+US hydro stations jointly owned with Innergex,30,2,hydro_us_joint,Hydro-Quebec / Innergex (joint ownership),US,False,,,unitemized in source; located in New England; not part of the QC grid
+Becancour (gas turbine),411,1,thermal_gas,Hydro-Quebec,QC,True,,,
+Off-grid diesel plants (unitemized),130,22,thermal_diesel_aggregate,Hydro-Quebec,QC,True,,,unitemized in source; off-grid/remote community systems; not connected to the main QC grid
+Gabrielle-Bodis,8,1,solar,Hydro-Quebec,QC,True,,,
+Robert-A.-Boyd,2,1,solar,Hydro-Quebec,QC,True,,,
+IPP wind farms (unitemized),3933,44,wind_ipp_aggregate,Independent Power Producers (PPA -- HQ purchases all output),QC,True,,,unitemized in source; individual wind farm list to be supplied separately
+IPP biomass and biogas cogeneration plants (unitemized),419,18,biomass_biogas_ipp_aggregate,Independent Power Producers (PPA -- HQ purchases almost all output),QC,True,,,unitemized in source; 13 biomass + 5 biogas
+Other PPA supply (unitemized),525,,other_ipp_aggregate,Independent Power Producers (PPA),QC,True,,,unitemized in source

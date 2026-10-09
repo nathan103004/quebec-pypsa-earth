@@ -1,0 +1,374 @@
+﻿region,mrc,municipality,total_kwh,share_of_total
+Montréal,,Montréal,3440672955.693371,0.28739161500484756
+Capitale-Nationale,,Québec,1172717963.9714286,0.09795447400871228
+Laval,,Laval,803256710.2419355,0.06709421272891354
+Outaouais,,Gatineau,618004797.1,0.051620540227578816
+Montérégie,,Longueuil,427574655.3,0.03571434202093315
+Chaudière-Appalaches,,Lévis,359595351.3035714,0.03003618480749871
+Lanaudière,Les Moulins,Terrebonne,225614909.5,0.01884510211965522
+Montérégie,Le Haut-Richelieu,Saint-Jean-sur-Richelieu,185319077.0,0.015479282546197367
+Centre-du-Québec,Drummond,Drummondville,168891058.9,0.014107087422195404
+Abitibi-Témiscamingue,,Rouyn-Noranda,158284480.4,0.01322114395588987
+Montérégie,Les Maskoutains,Saint-Hyacinthe,141834670.82285714,0.011847128639184306
+Estrie,La Haute-Yamaska,Granby,137465640.11,0.011482193404495383
+Laurentides,,Mirabel,134904822.4,0.011268294104304091
+Mauricie,,Shawinigan,117163916.26778206,0.00978643641813524
+Montérégie,,Boucherville,110002427.94285715,0.00918825352715955
+Laurentides,Thérèse-De Blainville,Blainville,106936341.1,0.00893215024130213
+Bas-Saint-Laurent,Rimouski-Neigette,Rimouski,104558181.0,0.008733507917349736
+Laurentides,Deux-Montagnes,Saint-Eustache,93096841.8,0.007776168226765114
+Centre-du-Québec,Arthabaska,Victoriaville,90593719.99285714,0.007567088134593532
+Montérégie,Vaudreuil-Soulanges,Vaudreuil-Dorion,89334837.83870968,0.007461936561037971
+Montérégie,Roussillon,Châteauguay,86499366.0,0.007225096023875287
+Lanaudière,Les Moulins,Mascouche,80945034.0,0.006761155258708484
+Montérégie,Marguerite-D'Youville,Varennes,79086173.74274194,0.006605888873823594
+Montérégie,Pierre-De Saurel,Sorel-Tracy,75819064.0,0.006332994600681187
+Chaudière-Appalaches,Beauce-Sartigan,Saint-Georges,67599341.0,0.005646419765385212
+Laurentides,Thérèse-De Blainville,Boisbriand,63192851.0,0.005278355641328555
+Montréal,,Dollard-Des Ormeaux,62786110.0,0.005244381487323229
+Chaudière-Appalaches,Les Appalaches,Thetford Mines,57764976.0,0.00482497754280478
+Montréal,,Mont-Royal,56875350.26285714,0.004750669120981573
+Laurentides,Les Laurentides,Mont-Tremblant,55017635.0,0.0045954983748842946
+Montérégie,Marguerite-D'Youville,Sainte-Julie,53622299.0,0.004478949120805715
+Laurentides,Thérèse-De Blainville,Sainte-Thérèse,53423071.8,0.004462308124262829
+Capitale-Nationale,,Saint-Augustin-de-Desmaures,52261076.7,0.004365249306782334
+Laurentides,Argenteuil,Lachute,50799057.2,0.004243130131061692
+Montérégie,La Vallée-du-Richelieu,Chambly,49463137.0,0.004131543744113669
+Estrie,Brome-Missisquoi,Bromont,46202672.5,0.003859204533038566
+Montérégie,Roussillon,La Prairie,44078840.0,0.003681805617176835
+Lanaudière,L'Assomption,L'Assomption,42108512.0,0.0035172285843401993
+Estrie,Brome-Missisquoi,Cowansville,42005479.6,0.0035086225214521743
+Montérégie,La Vallée-du-Richelieu,Beloeil,41475773.0,0.003464377329533883
+Laurentides,Les Pays-d'en-Haut,Sainte-Adèle,40417505.0,0.0033759826016581383
+Abitibi-Témiscamingue,Abitibi-Ouest,La Sarre,38862844.85098721,0.0032461253624604582
+Laurentides,Les Pays-d'en-Haut,Saint-Sauveur,38431126.0,0.003210064865165025
+Gaspésie--Îles-de-la-Madeleine,La Côte-de-Gaspé,Gaspé,34470086.0,0.002879208170164382
+Laurentides,La Rivière-du-Nord,Sainte-Sophie,33617998.0,0.002808035190459631
+Montréal,,Baie-D'Urfé,30264609.5,0.0025279342482416372
+Chaudière-Appalaches,La Nouvelle-Beauce,Sainte-Marie,30174817.79579832,0.002520434150668615
+Estrie,Brome-Missisquoi,Farnham,29298558.7,0.0024472422141064787
+Lanaudière,Matawinie,Rawdon,29144647.0,0.002434386318588148
+Laurentides,Deux-Montagnes,Deux-Montagnes,29138161.0,0.0024338445577062142
+Laurentides,La Rivière-du-Nord,Prévost,27390650.0,0.0022878789239491027
+Chaudière-Appalaches,Montmagny,Montmagny,27286658.0,0.002279192707847648
+Montérégie,La Vallée-du-Richelieu,Saint-Basile-le-Grand,26798881.0,0.0022384498003997734
+Lanaudière,D'Autray,Lavaltrie,26559577.0,0.0022184612795718007
+Laurentides,Thérèse-De Blainville,Sainte-Anne-des-Plaines,25391983.0,0.002120934798662095
+Lanaudière,Matawinie,Saint-Donat,24036827.0,0.002007741688930739
+Estrie,Brome-Missisquoi,Lac-Brome,23423303.0,0.001956495419530891
+Centre-du-Québec,L'Érable,Plessisville,23272646.0,0.0019439113817280127
+Montérégie,Roussillon,Mercier,23122749.0,0.001931390825002882
+Capitale-Nationale,Charlevoix-Est,La Malbaie,22790743.0,0.0019036591161889385
+Capitale-Nationale,Portneuf,Saint-Raymond,22761883.0,0.0019012485057892155
+Saguenay--Lac-Saint-Jean,Le Domaine-du-Roy,Roberval,22677324.0,0.0018941854841402145
+Outaouais,Les Collines-de-l'Outaouais,Cantley,22562730.0,0.0018846137070041835
+Montérégie,La Vallée-du-Richelieu,Carignan,21617617.0,0.001805670559855419
+Gaspésie--Îles-de-la-Madeleine,,Les Îles-de-la-Madeleine,20311835.0,0.001696601548456562
+Montérégie,Marguerite-D'Youville,Saint-Amable,20041178.0,0.0016739941825883078
+Centre-du-Québec,Nicolet-Yamaska,Nicolet,19313224.0,0.0016131898346007849
+Mauricie,Maskinongé,Louiseville,19286238.0,0.0016109357551743495
+Capitale-Nationale,Charlevoix,Baie-Saint-Paul,19055346.0,0.0015916498696437595
+Montérégie,Vaudreuil-Soulanges,Coteau-du-Lac,17950682.0,0.0014993797890270049
+Montérégie,Les Jardins-de-Napierville,Saint-Rémi,17807486.0,0.0014874189516465915
+Gaspésie--Îles-de-la-Madeleine,Le Rocher-Percé,Chandler,17307234.0,0.0014456340357185875
+Laurentides,Argenteuil,Brownsburg-Chatham,16554886.0,0.0013827921121908413
+Estrie,Memphrémagog,Orford,16167853.0,0.0013504641227647855
+Montérégie,Acton,Acton Vale,15986183.0,0.001335289639351145
+Lanaudière,L'Assomption,L'Épiphanie,15815855.0,0.0013210625274951502
+Montréal,,Hampstead,15649453.0,0.001307163345522361
+Centre-du-Québec,L'Érable,Princeville,15516421.2,0.0012960515007346318
+Chaudière-Appalaches,Beauce-Centre,Beauceville,15347757.0,0.0012819633623222637
+Capitale-Nationale,La Jacques-Cartier,Sainte-Catherine-de-la-Jacques-Cartier,15343357.0,0.0012815958402931998
+Lanaudière,Matawinie,Saint-Félix-de-Valois,15264803.0,0.001275034402686137
+Gaspésie--Îles-de-la-Madeleine,La Haute-Gaspésie,Sainte-Anne-des-Monts,14315454.0,0.0011957374320566646
+Chaudière-Appalaches,Lotbinière,Saint-Apollinaire,14001080.0,0.0011694784842464603
+Laurentides,Deux-Montagnes,Saint-Joseph-du-Lac,13884442.0,0.0011597359764223825
+Lanaudière,D'Autray,Berthierville,13664036.0,0.0011413259627092384
+Laurentides,Thérèse-De Blainville,Lorraine,13540164.0,0.0011309792152582863
+Bas-Saint-Laurent,La Matapédia,Amqui,13403961.0,0.0011196024873208828
+Montérégie,Vaudreuil-Soulanges,Les Cèdres,13061976.1,0.0010910372636033427
+Laurentides,Antoine-Labelle,Rivière-Rouge,12875404.0,0.001075453318885458
+Montérégie,Rouville,Saint-Césaire,12693496.0,0.0010602589558711547
+Lanaudière,Matawinie,Saint-Jean-de-Matha,12487477.0,0.0010430506556653155
+Lanaudière,Montcalm,Saint-Roch-de-l'Achigan,12451193.0,0.0010400199353692813
+Bas-Saint-Laurent,Kamouraska,La Pocatière,12356025.0,0.001032070767991567
+Estrie,Memphrémagog,Stanstead,12046078.0,0.001006181597459241
+Centre-du-Québec,Arthabaska,Warwick,12036927.3,0.0010054172602248425
+Chaudière-Appalaches,La Nouvelle-Beauce,Saint-Lambert-de-Lauzon,11550867.0,0.0009648177448377165
+Chaudière-Appalaches,Beauce-Centre,Saint-Joseph-de-Beauce,11475464.0,0.0009585195031201036
+Estrie,Le Haut-Saint-François,Cookshire-Eaton,11342971.0,0.0009474526630753881
+Abitibi-Témiscamingue,La Vallée-de-l'Or,Senneterre,11313657.0,0.0009450041310844845
+Lanaudière,Joliette,Saint-Paul,11185296.0,0.0009342824276361534
+Chaudière-Appalaches,Bellechasse,Sainte-Claire,11019530.222857144,0.0009204363879168629
+Laurentides,Deux-Montagnes,Pointe-Calumet,10790908.0,0.000901340091727424
+Chaudière-Appalaches,L'Islet,L'Islet,10704112.07628658,0.0008940902249097827
+Chaudière-Appalaches,Bellechasse,Saint-Henri,10692681.0,0.0008931354130117766
+Montérégie,Beauharnois-Salaberry,Sainte-Martine,10627901.0,0.000887724486411151
+Centre-du-Québec,Drummond,Saint-Germain-de-Grantham,10600056.0,0.0008853986566613144
+Mauricie,Maskinongé,Yamachiche,10464641.8,0.0008740878154003941
+Montérégie,Rouville,Richelieu,10446234.0,0.0008725502535807121
+Montérégie,Rouville,Rougemont,9860790.361290323,0.0008236494731259239
+Montérégie,Le Haut-Saint-Laurent,Ormstown,9831333.0,0.0008211889664913138
+Laurentides,Les Laurentides,Val-Morin,9806044.0,0.0008190766336292697
+Lanaudière,Montcalm,Saint-Jacques,9443066.0,0.0007887579038416525
+Estrie,Brome-Missisquoi,Bedford,9314472.0,0.0007780167384313278
+Capitale-Nationale,La Jacques-Cartier,Shannon,9194009.0,0.0007679547370251661
+Chaudière-Appalaches,Lotbinière,Sainte-Croix,9116646.0,0.000761492780949152
+Capitale-Nationale,La Côte-de-Beaupré,Château-Richer,9089377.0,0.0007592150631740293
+Mauricie,Mékinac,Saint-Tite,9071566.0,0.0007577273507059258
+Estrie,Le Val-Saint-François,Valcourt,9008356.0,0.000752447562647489
+Gaspésie--Îles-de-la-Madeleine,Avignon,Carleton-sur-Mer,8969529.0,0.0007492044313242027
+Montérégie,La Vallée-du-Richelieu,McMasterville,8877303.0,0.000741501002539558
+Nord-du-Québec,,Chisasibi,8676670.0,0.0007247425827083863
+Outaouais,Papineau,Saint-André-Avellin,8675988.0,0.0007246856167938815
+Chaudière-Appalaches,Les Etchemins,Lac-Etchemin,8631858.0,0.0007209995378978394
+Saguenay--Lac-Saint-Jean,Lac-Saint-Jean-Est,Métabetchouan--Lac-à-la-Croix,8545122.0,0.0007137546763721856
+Capitale-Nationale,Portneuf,Neuville,8523861.0,0.0007119787932222026
+Chaudière-Appalaches,L'Islet,Saint-Jean-Port-Joli,8503105.0,0.0007102450915778281
+Montérégie,La Vallée-du-Richelieu,Saint-Mathieu-de-Beloeil,8472782.0,0.0007077122801034414
+Montérégie,Les Maskoutains,Saint-Pie,8302011.0,0.0006934481654613387
+Saguenay--Lac-Saint-Jean,Maria-Chapdelaine,Normandin,8292078.0,0.0006926184844807271
+Chaudière-Appalaches,L'Islet,Saint-Pamphile,8222371.0,0.0006867960167352841
+Centre-du-Québec,Drummond,Saint-Cyrille-de-Wendover,8036586.0,0.000671277816696735
+Estrie,Brome-Missisquoi,Dunham,7937423.0,0.0006629949560221776
+Estrie,Coaticook,Waterville,7673309.0,0.0006409341121166882
+Lanaudière,D'Autray,Saint-Gabriel-de-Brandon,7668922.0,0.0006405676759481648
+Chaudière-Appalaches,Lotbinière,Saint-Agapit,7523731.0,0.0006284402007386647
+Capitale-Nationale,Portneuf,Saint-Marc-des-Carrières,7423752.0,0.0006200891814332628
+Capitale-Nationale,La Côte-de-Beaupré,Sainte-Anne-de-Beaupré,7233373.0,0.0006041872549852776
+Laurentides,Argenteuil,Saint-André-d'Argenteuil,7074278.0,0.0005908984101639359
+Bas-Saint-Laurent,Kamouraska,Saint-Pascal,7069254.0,0.0005904787668289321
+Estrie,La Haute-Yamaska,Saint-Alphonse-de-Granby,7064310.0,0.0005900658057126387
+Chaudière-Appalaches,La Nouvelle-Beauce,Saint-Isidore,7053624.0,0.0005891732283484169
+Capitale-Nationale,La Côte-de-Beaupré,L'Ange-Gardien,6998769.0,0.0005845913145065319
+Montérégie,Les Jardins-de-Napierville,Hemmingford,6988955.0,0.0005837715733262519
+Chaudière-Appalaches,Montmagny,Cap-Saint-Ignace,6862397.0,0.0005732004703821031
+Estrie,Memphrémagog,Austin,6786668.0,0.0005668749986232459
+Montérégie,Les Jardins-de-Napierville,Saint-Michel,6697200.0,0.0005594019393286371
+Chaudière-Appalaches,Beauce-Sartigan,Saint-Éphrem-de-Beauce,6603205.0,0.0005515507499827618
+Mauricie,Les Chenaux,Saint-Maurice,6330329.0,0.0005287580360730322
+Chaudière-Appalaches,Beauce-Sartigan,Saint-Côme--Linière,6316399.0,0.0005275944947401098
+Estrie,Le Haut-Saint-François,Weedon,6290330.0,0.0005254170102456407
+Chaudière-Appalaches,La Nouvelle-Beauce,Saint-Bernard,6288490.0,0.000525263319215305
+Lanaudière,L'Assomption,Saint-Sulpice,6054372.0,0.0005057079732152241
+Montérégie,Roussillon,Saint-Isidore,5973937.0,0.0004989894199407364
+Estrie,Memphrémagog,Hatley,5964086.0,0.0004981665882343029
+Chaudière-Appalaches,Lotbinière,Laurier-Station,5962607.0,0.0004980430507158972
+Saguenay--Lac-Saint-Jean,Le Domaine-du-Roy,Saint-Prime,5933530.0,0.0004956143147979227
+Chaudière-Appalaches,Beauce-Sartigan,Saint-Martin,5875820.0,0.0004907939292758156
+Chaudière-Appalaches,La Nouvelle-Beauce,Scott,5791530.0,0.00048375337658722767
+Bas-Saint-Laurent,Rivière-du-Loup,Saint-Antonin,5774869.0,0.0004823617210130841
+Saguenay--Lac-Saint-Jean,Lac-Saint-Jean-Est,Hébertville,5767680.0,0.0004817612401342342
+Montérégie,Les Maskoutains,Saint-Dominique,5702149.0,0.0004762875842054662
+Laurentides,Antoine-Labelle,Notre-Dame-du-Laus,5657122.0,0.0004725265809321355
+Bas-Saint-Laurent,Témiscouata,Pohénégamook,5617035.0,0.00046917820466416273
+Centre-du-Québec,Arthabaska,Daveluyville,5556691.0,0.00046413780709102063
+Montérégie,Acton,Upton,5463913.0,0.00045638827099727514
+Capitale-Nationale,,Wendake,5404566.0,0.00045143115057480953
+Lanaudière,Matawinie,Notre-Dame-de-la-Merci,5380900.0,0.00044945438322484965
+Capitale-Nationale,La Jacques-Cartier,Fossambault-sur-le-Lac,5373842.0,0.00044886484447913776
+Chaudière-Appalaches,Beauce-Sartigan,Saint-Gédéon-de-Beauce,5328589.0,0.00044508496393795056
+Montérégie,Pierre-De Saurel,Sainte-Anne-de-Sorel,5276165.0,0.00044070610601712327
+Centre-du-Québec,Nicolet-Yamaska,Pierreville,5258165.0,0.0004392026068073169
+Montérégie,Le Haut-Saint-Laurent,Saint-Chrysostome,5248798.0,0.0004384202025240804
+Chaudière-Appalaches,Bellechasse,Beaumont,5053590.0,0.0004221149206491977
+Outaouais,Papineau,Lac-Simon,4965669.0,0.0004147710787588983
+Montérégie,Pierre-De Saurel,Sainte-Victoire-de-Sorel,4942939.0,0.0004128724933678483
+Mauricie,Maskinongé,Maskinongé,4882952.0,0.0004078619151957007
+Outaouais,La Vallée-de-la-Gatineau,Lac-Sainte-Marie,4826809.0,0.0004031724176325806
+Chaudière-Appalaches,Bellechasse,Saint-Charles-de-Bellechasse,4762743.0,0.00039782112983394413
+Montérégie,Beauharnois-Salaberry,Saint-Louis-de-Gonzague,4735760.0,0.0003955673009907104
+Montérégie,Les Jardins-de-Napierville,Saint-Cyprien-de-Napierville,4560282.0,0.0003809100213052433
+Estrie,Le Granit,Lambton,4551186.0,0.0003801502530378878
+Lanaudière,D'Autray,Sainte-Geneviève-de-Berthier,4444968.0,0.0003712781042008202
+Chaudière-Appalaches,Lotbinière,Saint-Gilles,4353564.0,0.0003636433352134233
+Centre-du-Québec,Nicolet-Yamaska,Saint-François-du-Lac,4343271.0,0.0003627835842486156
+Nord-du-Québec,,Waswanipi,4313322.0,0.0003602820121466994
+Montérégie,Les Maskoutains,Saint-Valérien-de-Milton,4278441.0,0.0003573684812612962
+Estrie,La Haute-Yamaska,Sainte-Cécile-de-Milton,4175500.0,0.00034877005280814727
+Chaudière-Appalaches,Montmagny,Saint-François-de-la-Rivière-du-Sud,4036966.0,0.0003371986217230739
+Saguenay--Lac-Saint-Jean,Lac-Saint-Jean-Est,Saint-Nazaire,4017241.0,0.00033555103717232773
+Bas-Saint-Laurent,Rivière-du-Loup,Cacouna,3899269.0,0.0003256971033512565
+Montérégie,Le Haut-Richelieu,Henryville,3895358.0,0.00032537042638405915
+Saguenay--Lac-Saint-Jean,Le Fjord-du-Saguenay,L'Anse-Saint-Jean,3870034.0,0.0003232551700513293
+Côte-Nord,,Betsiamites,3824319.0,0.0003194366996970904
+Chaudière-Appalaches,Beauce-Sartigan,La Guadeloupe,3728253.0,0.0003114125244143536
+Chaudière-Appalaches,Les Appalaches,East Broughton,3701146.0,0.000309148338132119
+Centre-du-Québec,Drummond,Saint-Félix-de-Kingsey,3678964.0,0.0003072955259392343
+Chaudière-Appalaches,Les Etchemins,Sainte-Aurélie,3627905.0,0.00030303068337515066
+Chaudière-Appalaches,Beauce-Sartigan,Saint-Benoît-Labre,3531494.0,0.0002949776910242259
+Gaspésie--Îles-de-la-Madeleine,,Listuguj,3524084.0,0.0002943587505161889
+Estrie,Brome-Missisquoi,Frelighsburg,3500281.0,0.0002923705398666877
+Mauricie,Les Chenaux,Saint-Narcisse,3344893.0,0.0002793913323548323
+Centre-du-Québec,Drummond,Saint-Guillaume,3344381.0,0.0002793485661550867
+Bas-Saint-Laurent,Rimouski-Neigette,Saint-Fabien,3273237.0,0.0002734060690560607
+Côte-Nord,Le Golfe-du-Saint-Laurent,Blanc-Sablon,3205789.0,0.00026777229046144835
+Chaudière-Appalaches,Lotbinière,Saint-Édouard-de-Lotbinière,3075667.0,0.00025690349467375785
+Chaudière-Appalaches,L'Islet,Sainte-Perpétue,3072049.0,0.00025660129133258676
+Estrie,Le Granit,Frontenac,3048648.0,0.00025464665883210457
+Centre-du-Québec,Nicolet-Yamaska,Saint-Célestin,3031241.0,0.00025319269156848787
+Outaouais,Papineau,Val-des-Bois,3002688.0,0.00025080772418306554
+Abitibi-Témiscamingue,Témiscamingue,Lorrainville,2988890.0,0.00024965520851101503
+Centre-du-Québec,Nicolet-Yamaska,Sainte-Eulalie,2937089.0,0.0002453283883683938
+Abitibi-Témiscamingue,La Vallée-de-l'Or,Rivière-Héva,2905980.0,0.00024272992409517897
+Montérégie,Les Maskoutains,Saint-Jude,2848097.0,0.00023789508827511095
+Montérégie,Vaudreuil-Soulanges,Vaudreuil-sur-le-Lac,2845971.0,0.00023771750831288603
+Chaudière-Appalaches,Beauce-Centre,Tring-Jonction,2840695.0,0.000237276815988945
+Chaudière-Appalaches,Lotbinière,Saint-Narcisse-de-Beaurivage,2837080.0,0.00023697486323097556
+Chaudière-Appalaches,Lotbinière,Saint-Flavien,2832461.0,0.00023658904862819245
+Côte-Nord,Manicouagan,Pointe-aux-Outardes,2801884.0,0.00023403502110940077
+Mauricie,Maskinongé,Sainte-Ursule,2798146.0,0.0002337227944401643
+Chaudière-Appalaches,Beauce-Centre,Saint-Odilon-de-Cranbourne,2783515.0,0.00023250070016579333
+Bas-Saint-Laurent,Rivière-du-Loup,Notre-Dame-du-Portage,2763282.0,0.00023081068352623704
+Bas-Saint-Laurent,Rivière-du-Loup,L'Isle-Verte,2710212.0,0.0002263778666893245
+Outaouais,La Vallée-de-la-Gatineau,Grand-Remous,2704313.0,0.00022588513658717738
+Saguenay--Lac-Saint-Jean,Le Domaine-du-Roy,Lac-Bouchette,2698088.0,0.000225365176443786
+Outaouais,Pontiac,Otter Lake,2683274.0,0.00022412779659411531
+Capitale-Nationale,La Côte-de-Beaupré,Saint-Joachim,2669093.0,0.0002229432897999895
+Chaudière-Appalaches,Montmagny,Saint-Just-de-Bretenières,2652076.0,0.00022152189835258532
+Montérégie,Vaudreuil-Soulanges,Pointe-des-Cascades,2612172.0,0.00021818880765991228
+Bas-Saint-Laurent,Les Basques,Notre-Dame-des-Neiges,2608751.0,0.00021790305928231517
+Chaudière-Appalaches,La Nouvelle-Beauce,Sainte-Marguerite,2532046.0,0.00021149606445519293
+Abitibi-Témiscamingue,Témiscamingue,Saint-Bruno-de-Guigues,2527443.0,0.00021111158629615186
+Saguenay--Lac-Saint-Jean,Lac-Saint-Jean-Est,Labrecque,2517582.0,0.00021028791931237959
+Chaudière-Appalaches,La Nouvelle-Beauce,Sainte-Hénédine,2516586.0,0.00021020472568943698
+Laurentides,Antoine-Labelle,L'Ascension,2485060.0,0.00020757143035119493
+Laurentides,Les Laurentides,Brébeuf,2481136.0,0.00020724366752345713
+Estrie,Le Granit,Lac-Drolet,2465300.0,0.000205920922329763
+Estrie,Memphrémagog,North Hatley,2388804.0,0.00019953138479902128
+Mauricie,Maskinongé,Saint-Barnabé,2377136.0,0.00019855678320013123
+Outaouais,Papineau,Plaisance,2367145.0,0.0001977222576109548
+Centre-du-Québec,Nicolet-Yamaska,Baie-du-Febvre,2339273.0,0.00019539417261230346
+Centre-du-Québec,L'Érable,Laurierville,2323652.0,0.00019408938588139313
+Côte-Nord,,Maliotenam,2264553.0,0.0001891529803369293
+Chaudière-Appalaches,Lotbinière,Sainte-Agathe-de-Lotbinière,2227071.0,0.0001860221938157091
+Estrie,Le Granit,Saint-Ludger,2172006.0,0.00018142273914970966
+Centre-du-Québec,Drummond,Saint-Bonaventure,2120441.0,0.0001771156315522837
+Estrie,Le Haut-Saint-François,Bury,2102890.0,0.00017564963629498857
+Mauricie,Maskinongé,Saint-Justin,2064324.0,0.00017242830571024447
+Estrie,Le Granit,Notre-Dame-des-Bois,2046024.0,0.00017089974818027462
+Saguenay--Lac-Saint-Jean,Lac-Saint-Jean-Est,Saint-Henri-de-Taillon,2025016.0,0.0001691449975469628
+Nord-du-Québec,Administration régionale Kativik,Kuujjuaq,2008687.0,0.00016778107318046674
+Bas-Saint-Laurent,Rimouski-Neigette,Saint-Narcisse-de-Rimouski,1994963.0,0.00016663473856072324
+Mauricie,Maskinongé,Saint-Léon-le-Grand,1929818.0,0.00016119332433723222
+Côte-Nord,Le Golfe-du-Saint-Laurent,Saint-Augustin,1916418.0,0.00016007405270326524
+Montérégie,Pierre-De Saurel,Saint-David,1880176.0,0.0001570468405720539
+Chaudière-Appalaches,Bellechasse,Honfleur,1799764.0,0.00015033020843544542
+Abitibi-Témiscamingue,Abitibi,Saint-Félix-de-Dalquier,1796696.0,0.0001500739453479073
+Bas-Saint-Laurent,La Mitis,Saint-Gabriel-de-Rimouski,1777402.0,0.0001484623612504626
+Côte-Nord,Le Golfe-du-Saint-Laurent,Côte-Nord-du-Golfe-du-Saint-Laurent,1757120.0,0.00014676825175194628
+Centre-du-Québec,Nicolet-Yamaska,Saint-Zéphirin-de-Courval,1751917.0,0.00014633365695257837
+Abitibi-Témiscamingue,Abitibi,Saint-Marc-de-Figuery,1751637.0,0.00014631026918709248
+Laurentides,Antoine-Labelle,Kiamika,1736413.0,0.00014503864296653177
+Estrie,Le Granit,Courcelles,1732150.0,0.00014468256423700928
+Laurentides,Antoine-Labelle,Sainte-Anne-du-Lac,1731682.0,0.0001446434732575543
+Outaouais,Pontiac,Campbell's Bay,1727021.0,0.00014425415048994835
+Estrie,Coaticook,Saint-Herménégilde,1687463.0,0.00014094996039319712
+Montérégie,Vaudreuil-Soulanges,Saint-Télesphore,1623921.0,0.00013564244112711276
+Estrie,Brome-Missisquoi,Stanbridge East,1584332.0,0.0001323356616706113
+Capitale-Nationale,La Jacques-Cartier,Lac-Delage,1579861.0,0.00013196220917244218
+Chaudière-Appalaches,Beauce-Sartigan,Saint-Théophile,1569451.0,0.00013109268546277082
+Bas-Saint-Laurent,La Matapédia,Val-Brillant,1567031.0,0.00013089054834678572
+Outaouais,Pontiac,L'Île-du-Grand-Calumet,1562900.0,0.00013054549527813516
+Abitibi-Témiscamingue,Abitibi-Ouest,Dupuy,1546456.0,0.00012917196522224314
+Saguenay--Lac-Saint-Jean,Le Fjord-du-Saguenay,Saint-Charles-de-Bourget,1530164.0,0.00012781113138190058
+Montérégie,Acton,Sainte-Christine,1517814.0,0.0001267795638685056
+Bas-Saint-Laurent,La Matanie,Sainte-Félicité,1495899.0,0.00012494905358056632
+Gaspésie--Îles-de-la-Madeleine,,Gesgapegiag,1458941.0,0.00012186203559189826
+Chaudière-Appalaches,L'Islet,Saint-Cyrille-de-Lessard,1405826.0,0.00011742546000696119
+Estrie,Coaticook,Dixville,1393426.0,0.00011638971610687233
+Saguenay--Lac-Saint-Jean,Le Fjord-du-Saguenay,Petit-Saguenay,1389674.0,0.00011607632004936157
+Chaudière-Appalaches,Les Etchemins,Saint-Benjamin,1360313.0,0.00011362386225496569
+Centre-du-Québec,Drummond,Saint-Edmond-de-Grantham,1332831.0,0.00011132835307252682
+Saguenay--Lac-Saint-Jean,Le Domaine-du-Roy,Sainte-Hedwidge,1332373.0,0.00011129009737041063
+Bas-Saint-Laurent,La Matanie,Saint-René-de-Matane,1323071.0,0.00011051312238987623
+Bas-Saint-Laurent,Témiscouata,Saint-Honoré-de-Témiscouata,1322554.0,0.00011046993855146124
+Chaudière-Appalaches,Lotbinière,Leclercville,1321471.0,0.00011037947801567122
+Outaouais,La Vallée-de-la-Gatineau,Montcerf-Lytton,1285715.0,0.00010739286036312467
+Saguenay--Lac-Saint-Jean,Le Fjord-du-Saguenay,Sainte-Rose-du-Nord,1259624.0,0.00010521353825851028
+Outaouais,Pontiac,Bryson,1254303.0,0.00010476908718654474
+Abitibi-Témiscamingue,Témiscamingue,Saint-Édouard-de-Fabre,1223381.0,0.00010218624259956508
+Chaudière-Appalaches,Les Etchemins,Sainte-Rose-de-Watford,1203387.0,0.00010051618908840568
+Bas-Saint-Laurent,Rivière-du-Loup,Saint-Épiphane,1192442.0,9.960197804110951e-05
+Outaouais,Papineau,Boileau,1187107.0,9.915635758086966e-05
+Bas-Saint-Laurent,La Matapédia,Saint-Léon-le-Grand,1177252.0,9.833319176350065e-05
+Laurentides,Antoine-Labelle,Lac-Saint-Paul,1173964.0,9.805855257450934e-05
+Bas-Saint-Laurent,Rimouski-Neigette,Saint-Valérien,1168656.0,9.761518736308421e-05
+Abitibi-Témiscamingue,Témiscamingue,Saint-Eugène-de-Guigues,1164817.0,9.729452439272607e-05
+Estrie,Le Granit,Marston,1163034.0,9.714559444322135e-05
+Bas-Saint-Laurent,La Matanie,Baie-des-Sables,1134813.0,9.478835826544654e-05
+Abitibi-Témiscamingue,Abitibi,Sainte-Gertrude-Manneville,1115436.0,9.316984136608995e-05
+Bas-Saint-Laurent,Témiscouata,Saint-Eusèbe,1077036.0,8.99623763851696e-05
+Montérégie,Le Haut-Saint-Laurent,Dundee,1071644.0,8.95119948440987e-05
+Chaudière-Appalaches,Les Appalaches,Sainte-Praxède,1069232.0,8.931052594998465e-05
+Côte-Nord,Minganie,Natashquan,1051620.0,8.783943550092296e-05
+Chaudière-Appalaches,L'Islet,Sainte-Louise,1032946.0,8.627963859848269e-05
+Centre-du-Québec,Arthabaska,Saints-Martyrs-Canadiens,1031893.0,8.619168389470901e-05
+Outaouais,Papineau,Notre-Dame-de-Bonsecours,1011948.0,8.452572324250965e-05
+Saguenay--Lac-Saint-Jean,Le Domaine-du-Roy,Saint-François-de-Sales,1004132.0,8.387287047451815e-05
+Côte-Nord,,Mingan,967923.0,8.08484147585248e-05
+Estrie,Les Sources,Saint-Adrien,946419.0,7.905223436920941e-05
+Côte-Nord,,Natashquan,945798.0,7.90003636464711e-05
+Bas-Saint-Laurent,Les Basques,Saint-Simon-de-Rimouski,944384.0,7.888225543076742e-05
+Capitale-Nationale,Charlevoix-Est,Notre-Dame-des-Monts,936844.0,7.825245631732629e-05
+Bas-Saint-Laurent,La Mitis,Les Hauteurs,936032.0,7.818463179741725e-05
+Nord-du-Québec,Administration régionale Kativik,Salluit,927138.0,7.744173613230512e-05
+Abitibi-Témiscamingue,Abitibi-Ouest,Poularies,912211.0,7.619491764870622e-05
+Bas-Saint-Laurent,Témiscouata,Auclair,874234.0,7.302278489921633e-05
+Bas-Saint-Laurent,La Matapédia,Sainte-Irène,847434.0,7.078424163128236e-05
+Chaudière-Appalaches,L'Islet,Saint-Damase-de-L'Islet,837061.0,6.991780844776448e-05
+Chaudière-Appalaches,L'Islet,Saint-Marcel,811780.0,6.780614380759137e-05
+Chaudière-Appalaches,Les Etchemins,Saint-Luc-de-Bellechasse,803168.0,6.708680296343289e-05
+Bas-Saint-Laurent,La Mitis,Saint-Octave-de-Métis,801044.0,6.690939005667573e-05
+Chaudière-Appalaches,L'Islet,Saint-Adalbert,784684.0,6.554287633042946e-05
+Nord-du-Québec,Administration régionale Kativik,Kuujjuarapik,775426.0,6.476957657018571e-05
+Estrie,Le Haut-Saint-François,Lingwick,774211.0,6.466809037352377e-05
+Chaudière-Appalaches,Les Appalaches,Saint-Adrien-d'Irlande,744043.0,6.214822569788824e-05
+Abitibi-Témiscamingue,Témiscamingue,Nédélec,740665.0,6.186606901284789e-05
+Abitibi-Témiscamingue,Abitibi-Ouest,Roquemaure,736834.0,6.154607426436077e-05
+Chaudière-Appalaches,Les Etchemins,Saint-Cyprien,714045.0,5.964256073701198e-05
+Bas-Saint-Laurent,Témiscouata,Lejeune,700172.0,5.848378048492063e-05
+Centre-du-Québec,Bécancour,Sainte-Cécile-de-Lévrard,691315.0,5.7743975345962e-05
+Abitibi-Témiscamingue,,Winneway,689104.0,5.755929552635744e-05
+Abitibi-Témiscamingue,Témiscamingue,Latulipe-et-Gaboury,688655.0,5.7521791573846164e-05
+Côte-Nord,Manicouagan,Franquelin,686151.0,5.731263812821532e-05
+Bas-Saint-Laurent,Rimouski-Neigette,Saint-Eugène-de-Ladrière,685145.0,5.722860922793391e-05
+Chaudière-Appalaches,Montmagny,Sainte-Apolline-de-Patton,674688.0,5.635515971477027e-05
+Chaudière-Appalaches,Montmagny,Notre-Dame-du-Rosaire,673093.0,5.622193297923465e-05
+Outaouais,Pontiac,Portage-du-Fort,663111.0,5.5388159139663116e-05
+Saguenay--Lac-Saint-Jean,Maria-Chapdelaine,Saint-Edmond-les-Plaines,655305.0,5.4736141649010405e-05
+Bas-Saint-Laurent,Kamouraska,Saint-Bruno-de-Kamouraska,653741.0,5.4605504273225e-05
+Montérégie,Acton,Béthanie,635249.0,5.306090941835055e-05
+Abitibi-Témiscamingue,Abitibi-Ouest,Rapide-Danseur,619111.0,5.171293884902523e-05
+Chaudière-Appalaches,Beauce-Centre,Saint-Séverin,615996.0,5.145274995799485e-05
+Bas-Saint-Laurent,Témiscouata,Saint-Athanase,572480.0,4.781795709055398e-05
+Nord-du-Québec,Administration régionale Kativik,Kangiqsujuaq,569732.0,4.758842287785687e-05
+Chaudière-Appalaches,Les Etchemins,Sainte-Sabine,569601.0,4.7577480744718836e-05
+Côte-Nord,Minganie,Aguanish,549945.0,4.593565960761024e-05
+Bas-Saint-Laurent,La Mitis,Grand-Métis,544679.0,4.5495802561007984e-05
+Chaudière-Appalaches,Beauce-Sartigan,Saint-Philibert,533076.0,4.452663026482e-05
+Bas-Saint-Laurent,La Matapédia,Saint-Zénon-du-Lac-Humqui,517646.0,4.32377973310804e-05
+Chaudière-Appalaches,Bellechasse,Saint-Nazaire-de-Dorchester,514537.0,4.297810960645328e-05
+Gaspésie--Îles-de-la-Madeleine,La Haute-Gaspésie,Mont-Saint-Pierre,493494.0,4.1220435502455714e-05
+Bas-Saint-Laurent,Les Basques,Sainte-Rita,489401.0,4.087855648769251e-05
+Nord-du-Québec,Administration régionale Kativik,Kangirsuk,482356.0,4.029010360252106e-05
+Chaudière-Appalaches,Montmagny,Sainte-Euphémie-sur-Rivière-du-Sud,474613.0,3.964334835910267e-05
+Nord-du-Québec,Administration régionale Kativik,Kangiqsualujjuaq,471665.0,3.939710859962993e-05
+Abitibi-Témiscamingue,Abitibi,Launay,451545.0,3.7716530594001884e-05
+Chaudière-Appalaches,Les Appalaches,Saint-Jacques-le-Majeur-de-Wolfestown,440671.0,3.680825001581106e-05
+Abitibi-Témiscamingue,,Lac-Chicobi,436026.0,3.642026369194712e-05
+Abitibi-Témiscamingue,Témiscamingue,Moffet,435107.0,3.634350170451312e-05
+Abitibi-Témiscamingue,Abitibi,La Morandière,378836.0,3.164331259145666e-05
+Bas-Saint-Laurent,La Matapédia,Albertville,373768.0,3.1219994036162275e-05
+Gaspésie--Îles-de-la-Madeleine,Avignon,L'Ascension-de-Patapédia,367584.0,3.0703458529859895e-05
+Nord-du-Québec,Administration régionale Kativik,Akulivik,365380.0,3.051936340439249e-05
+Nord-du-Québec,Administration régionale Kativik,Umiujaq,361003.0,3.01537625132079e-05
+Gaspésie--Îles-de-la-Madeleine,La Côte-de-Gaspé,Petite-Vallée,332515.0,2.7774224430487627e-05
+Bas-Saint-Laurent,La Mitis,Saint-Charles-Garnier,326954.0,2.7309726702391326e-05
+Nord-du-Québec,Administration régionale Kativik,Quaqtaq,302564.0,2.5272485273103644e-05
+Bas-Saint-Laurent,La Mitis,Padoue,294494.0,2.4598416460707107e-05
+Nord-du-Québec,Administration régionale Kativik,Tasiujaq,278721.0,2.3280933514247302e-05
+Nord-du-Québec,Administration régionale Kativik,Aupaluk,240357.0,2.007647553174658e-05
+Nord-du-Québec,Administration régionale Kativik,Ivujivik,231200.0,1.9311612072624513e-05
+Outaouais,,Lac-Pythonga,166402.0,1.3899181972789204e-05
+Bas-Saint-Laurent,,Lac-Casault,40495.0,3.382455583395024e-06

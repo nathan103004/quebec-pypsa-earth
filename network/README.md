@@ -100,7 +100,7 @@ Outputs:
 - `export_to_matpower.py --network ... --output ...` -> MATPOWER case for an independent AC PF in
   MATLAB (`quebec_735kv.m`, `quebec_main_island.m`; shunts carried as bus `Bs`).
 - `visualize_ac_pf_map.py`, `visualize_solved_network_map.py`, `visualize_real_network_map.py` ->
-  HTML + PNG maps.
+  PNG maps (the interactive HTML is written alongside but not committed).
 
 On machines where Windows Application Control blocks the netCDF4 DLL, open and save networks with
 xarray's `h5netcdf` engine instead.

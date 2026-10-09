@@ -1,0 +1,39 @@
+Warning 3: Cannot find header.dxf (GDAL_DATA is not defined)
+Cannot find header.dxf (GDAL_DATA is not defined)
+C:\Users\hjgua\miniconda3\envs\pypsa-earth\Lib\site-packages\xarray\backends\plugins.py:110: RuntimeWarning: Engine 'cfgrib' loading failed:
+Cannot find the ecCodes library
+  external_backend_entrypoints = backends_dict_from_pkg(entrypoints_unique)
+Warning 3: Cannot find gdalvrt.xsd (GDAL_DATA is not defined)
+INFO:pypsa.io:Imported network elec_solved.nc has buses, carriers, generators, lines, links, loads, storage_units, transformers
+INFO:pypsa.io:Exported network 'elec_735kv.nc' contains: generators, storage_units, loads, carriers, lines, buses
+Loading solved network: networks_test_hq_cold_735/elec_solved.nc
+  205 buses, 276 lines, 22 transformers, 5 links, 262 generators, 22 storage units, 647 loads
+
+Backbone: 58 buses at [735.0, 765.0] -> relabeling all to 735kV
+Converting bridge transformer 'transf_55_3' (132-133) into an equivalent Line...
+
+Assigning every non-backbone bus to its nearest backbone bus via graph shortest-path (cumulative real line length, multi-source Dijkstra)...
+
+Aggregating loads onto their nearest backbone bus...
+  647 original loads -> 58 aggregate loads on backbone buses
+
+Aggregating generators onto (nearest backbone bus, carrier), using actual solved dispatch (not a re-derived capacity-factor ceiling)...
+  262 original generators -> 82 aggregate generators
+
+Aggregating storage units onto (nearest backbone bus, carrier), same treatment...
+  22 original storage units -> 11 aggregate storage units
+
+Dropping all 5 links and all 22 transformers (bridge one already replaced by an equivalent Line above)...
+Removing all original loads, generators, storage units...
+Dropping every non-backbone bus and any line touching one...
+
+Adding aggregated loads/generators/storage units to the reduced network...
+
+Assigning slack (largest-capacity plain Generator, excluding load_shedding)...
+  Slack generator: '340 AC' at bus 340 (7722 MW)
+
+Final reduced network: 58 buses, 109 lines, 82 generators, 11 storage units, 58 loads
+Total load (mean): 28871 MW
+Total generator + storage dispatch (mean): 28871 MW
+
+Saved reduced network -> networks_test_hq_cold_735/elec_735kv.nc

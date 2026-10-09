@@ -24,7 +24,7 @@ import pandas as pd
 import pypsa
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DEFAULT_NETWORK = os.path.join(BASE_DIR, "networks", "elec_solved.nc")
+DEFAULT_NETWORK = os.path.join(BASE_DIR, "network", "networks_current", "elec_solved.nc")
 
 TRANSFORMER_X_R_RATIO = 30.0
 LOAD_POWER_FACTOR = 0.95

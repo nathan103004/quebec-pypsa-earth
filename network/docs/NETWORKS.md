@@ -1,60 +1,58 @@
 # Network versions
 
-Three networks filtered to different voltage resolution to fit different constraints and achieve different goals
-
-**Note on `num_parallel`:** while some corridors are already circuit-corrected upstream
-(`fix_parallel_circuits_v2.py`), five 735kV corridors leaving major generating stations still had
-only 1-2 of their real 3 parallel circuits modeled. `correct_sending_end_circuits.py` fixes this
-on the 735kV network below -- see [POWER_FLOW.md](POWER_FLOW.md). Not yet applied to the 315kV
-network.
+Three networks at different voltage resolution, each built for a different purpose. Current files
+are in `network/networks_current/`; earlier versions are in `networks_current/_archive/`.
 
 ## 1. Unreduced (`elec_full.nc`)
 
-The raw topology from PyPSA-Earth's OSM extraction, covering every voltage level, all of
-Canada. 4,013 buses, 4,546 lines, 796 transformers, 47 DC links.
+PyPSA-Earth's OSM-derived topology with the raw-network data fixes applied (see the workflow in
+[../README.md](../README.md)). Every voltage level from 60 to 765kV, 4,013 buses, 4,546 lines, 796
+transformers, 47 DC links.
 
-Since we are only interested in the Quebec network, the
-`reduce_voltage_network.py` is created to extract the quebec grid. Can be visualized by running
-(`visualize_real_network_map.py`).
+The topology covers all of Canada (roughly 1,400 buses are in Quebec), but its generators are
+Quebec only: `attach_real_generators.py` replaced PyPSA-Earth's generators with Hydro-Québec's
+station data. Demand here is PyPSA-Earth's synthetic demand for all of Canada (92.6 GW mean) and is
+not calibrated. `visualize_real_network_map.py` maps it.
 
 ![Unreduced Quebec-region network -- voltage levels, substations, loads, generators](../quebec_real_network_map.png)
 
-## 2. 315kV reduced (`elec_reduced.nc` -> `elec_solved.nc`)
+## 2. 315kV (`elec_reduced.nc` -> `elec_solved.nc`)
 
-210 buses, 278 lines, 22 transformers, 6 links, 205 buses after largest-island extraction, 276
-lines, 72 real generators (plus per-bus load-shedding placeholders), 22 storage units, 647 loads.
-Generation capacity is corrected against HQ's official generating-stations list -- see
-[GENERATORS.md](GENERATORS.md).
+`reduce_voltage_network.py` keeps every bus at 315kV or above in Quebec's region and reassigns each
+lower-voltage bus to its nearest kept bus by straight-line distance; no load, generator or storage
+unit is dropped. `elec_reduced.nc` has 210 buses, 278 lines, 22 transformers and 6 links, with the
+generation-capacity correction applied (see [GENERATORS.md](GENERATORS.md)).
 
-Built by `reduce_voltage_network.py`. It keeps every bus at 315kV or above, and folds every lower-voltage local bus onto its nearest bus -- no load, generator, or storage unit is dropped, only reassigned.
-`run_lopf_main_island.py`extracts the single largest connected island and solves LOPF on it.
+`run_lopf_main_island.py` keeps the largest connected island and solves LOPF: 205 buses, 276 lines,
+5 DC links, 22 transformers, 647 loads, 72 generators, 22 storage units. This is the main working
+network. Mean demand 28,871 MW over the solved week, **0% load shed**.
 
-This is the main working network: the 2022 dispatch is solved on this network via LOPF. Demand:
-~30,200 MW mean over the solved week (2022-01-01 to 2022-01-07, calibrated against historical
-whole-January-2022 system demand -- reduce_voltage_network.py's nearest-bus reassignment isn't
-fully deterministic run-to-run, so the exact figure can drift slightly between regenerations).
-**0% load shed.**
+The island extraction drops two small groups of buses cut off from the main grid in this
+reduction, with 6 wind farms (438 MW) and 44 loads: bus 1315 (Baie-des-Chaleurs) and buses
+329-3975 (Estrie). In reality they connect through lines below 315kV that the reduction removes.
 
-This is also the network AC power flow would need to converge on for genuinely representative
-contingency analysis. It does not: **0/168** under full nonlinear AC PF -- see
-[POWER_FLOW.md](POWER_FLOW.md) for the circuit-count correction and series compensation applied to the 735kV network, which can be applied to the 315kV network in the future.
+AC power flow does not converge on this network (1/168) -- see [POWER_FLOW.md](POWER_FLOW.md).
 
-![315kV reduced network -- LOPF congestion, load, shedding, and hydro dispatch](../quebec_reduced_network_map.png)
+![315kV network -- LOPF congestion, load, shedding, and hydro dispatch](../quebec_reduced_network_map.png)
 
-## 3. 735kV backbone (`elec_735kv.nc`)
+## 3. 735kV backbone (`elec_735kv.nc`, `elec_735kv_shunt.nc`)
 
-58 buses, 109 lines. A further reduction from the solved 315kV network down to just the 735/765kV
-backbone built by
-`reduce_to_735kv.py`. Every other bus is reassigned to its nearest 735kV-tier bus by shortest electrical path; loads landing on the same bus are
-summed into one aggregate load, and generators/storage of the same carrier are merged the same
-way. Note that this network is not rerun with LOPF so that dispatch is still accurate post generator aggregation.
+`reduce_to_735kv.py` keeps the 735/765kV buses and lines (765kV treated as 735kV) and reassigns
+every other bus to its nearest backbone bus by shortest path over real line length. Loads on the
+same bus are summed; generators and storage of the same carrier on the same bus are merged. The
+LOPF dispatch is carried over as fixed `p_set`; this network is not re-optimized. Slack is set to
+`114 ror`.
 
-Purpose-built for AC power flow tractability: small and heavily meshed, so it was expected to
-converge more readily than the 315kV network, making it easier to diagnose AC PF divergence. At
-current (100%) demand it fully converges (**168/168**), max line loading 86.2% -- see
-[POWER_FLOW.md](POWER_FLOW.md) for the fixes (circuit-count correction, series compensation). Voltage is outside the 0.95--1.05pu band at some hour on 17/58 buses (below) and 21/58 (above); no shunt reactive support is modeled.
+58 buses, 109 lines, 58 loads, 23 generators, 11 storage units, no links or transformers. Built for
+AC power flow: small and meshed, so divergence can be diagnosed.
 
-Line parameters (r/x/b) on this network's 315/345kV and 735/765kV lines come from Hydro-Quebec's
-own line-characteristics table (`network/hq_line_characteristics_by_voltage.csv`,
+- `elec_735kv.nc`: circuit-count correction and 70% series compensation applied. AC PF 168/168,
+  0.904-1.123 pu.
+- `elec_735kv_shunt.nc`: the same plus 5 shunt capacitors and 11 shunt reactors. AC PF 168/168,
+  0.966-1.059 pu.
+
+See [POWER_FLOW.md](POWER_FLOW.md) for each step and the results.
+
+Line parameters (r/x/b) on all 315/345kV and 735/765kV lines come from Hydro-Québec's
+line-characteristics table (`hq_line_characteristics_by_voltage.csv`,
 `apply_hq_line_characteristics.py`) -- see [DATA_SOURCES.md](DATA_SOURCES.md).
-

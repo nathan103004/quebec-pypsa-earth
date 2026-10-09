@@ -29,14 +29,15 @@ project without re-deriving everything from scratch.
   3. **735kV reduced** (`elec_735kv.nc`, 58 buses, 109 lines) — a further reduction down to just
      the 735/765kV backbone (`reduce_to_735kv.py`), aggregating everything else onto backbone
      buses by graph shortest-path. Purpose-built for AC PF tractability. At current real demand it
-     converges **168/168** snapshots — fixed via a circuit-count correction on five sending-end
-     corridors plus series compensation on their feeding lines (see `network/docs/POWER_FLOW.md`).
-     Light-load overvoltage on this network is still open.
-  4. A copy of the current, verified pipeline outputs (`elec_full.nc`, `elec_reduced.nc`,
-     `elec_solved.nc`, `elec_735kv.nc`/`_pf.nc`, `elec_735kv_scaled86.nc`/`_pf.nc`) is kept in
-     `network/networks_current/` — use that to know which files in `networks/` are the real
-     current state vs. stale/diagnostic leftovers. The original, unmodified networks are backed up
-     in `network/networks_backup_original/`.
+     converges **168/168** snapshots after a circuit-count correction on five sending-end
+     corridors plus 70% series compensation on 15 lines; shunt reactors and capacitors
+     (`elec_735kv_shunt.nc`) bring voltages to 0.966–1.059 pu (see `network/docs/POWER_FLOW.md`).
+  4. The current pipeline outputs (`elec_full.nc`, `elec_reduced.nc`, `elec_solved.nc`,
+     `elec_735kv.nc`/`_pf.nc`, `elec_735kv_shunt.nc`/`_pf.nc`, `summary_735kv_acpf.csv`) are in
+     `network/networks_current/`, which every script defaults to. Earlier versions are in
+     `networks_current/_archive/`; files in `networks/` are stale/diagnostic leftovers.
+     `network/networks_test_hq_cold_735/` is a test with Hydro-Québec cold thermal ratings on
+     735kV lines (README inside).
 - Full documentation lives under `network/docs/` — read `POWER_FLOW.md` before re-investigating
   anything AC-PF-related; it documents the current AC PF state, the fixes applied, and where the
   315kV divergence localizes.
@@ -58,12 +59,6 @@ project without re-deriving everything from scratch.
    - `apply_hq_line_characteristics.py` — writes Hydro-Québec's own r/x/b onto 315/345kV and
      735/765kV lines (from `hq_line_characteristics_by_voltage.csv`) and clears their `type` so
      `calculate_dependent_values()` doesn't recompute them.
-   - `correct_sending_end_circuits.py` — corrects undercounted parallel circuits on five 735kV
-     corridors leaving major generating stations (missed by `fix_parallel_circuits_v2.py`);
-     recomputes r/x/b from HQ per-km rates with the corrected `num_parallel`.
-   - `apply_series_compensation.py` — 70% series compensation on 15 lines: the ten feeding the
-     735kV network's three voltage-collapse buses, plus five carrying the highest transmission
-     angles on the network; runs after the two steps above, before the reduction.
    - `regional_demand.py` / `rescale_demand_regional.py` — replaced PyPSA-Earth's synthetic
      population/GDP demand proxy with real HQ municipal consumption data; fixed a 2.6x magnitude
      error in total system demand.
@@ -79,28 +74,29 @@ project without re-deriving everything from scratch.
      reduction work should use graph shortest-path over real line length instead (see
      `reduce_to_735kv.py` for the pattern) — this was deliberately NOT retrofitted into
      `reduce_voltage_network.py` itself, only worked around downstream.
-   → produces `elec_reduced.nc`, the current input to the live pipeline below.
+   - Generation-capacity correction — manual (14 missing hydro stations added, wind/solar scaled
+     to HQ totals); method and data in `network/docs/GENERATORS.md`. No script.
+   → produces `elec_reduced.nc`, the current input to the live pipeline below. It has no series
+   compensation; compensation is applied only on the 735kV network.
 3. **`run_lopf_main_island.py`** — the main, repeatedly-rerun LOPF script. Takes `elec_reduced.nc`,
    extracts the largest connected island, applies marginal costs, real generation ceilings
    (ror/storage capped by real hourly `Hydraulique` dispatch data, OCGT by real `Thermique` data),
    line/transformer capacity fixes (St Clair-derived, ×3 margin; flat 100,000 MVA transformers),
    adds VOLL load-shedding generators, assigns slack, and solves LOPF.
-   → produces `elec_solved.nc`, **the current best network** (0% shed, demand within 0.2% of real
-   HQ data for the window solved). Currently solved for a 1-week window (168 snapshots,
-   2022-01-01 to 2022-01-07); can be re-run with `--snapshots N` for other windows.
+   → produces `elec_solved.nc`, **the current best network** (0% shed; demand scale 1.0653
+   calibrated to the solved week's real mean, 28,870 MW; wind marginal cost -0.1 so wind isn't
+   curtailed in the tie with zero-cost hydro). Currently solved for a 1-week window (168
+   snapshots, 2022-01-01 to 2022-01-07); can be re-run with `--snapshots N` for other windows
+   (re-calibrate `DEMAND_SCALE_FACTOR` if so).
    - **Slack assignment**: picks the bus with the largest TOTAL generation capacity (Generator +
      StorageUnit combined), not just the largest plain-Generator bus. Storage-only buses (PyPSA's
      `find_bus_controls()` never reads `StorageUnit.control`, confirmed from source) get a
-     zero-dispatch placeholder Generator added so they can actually host the slack flag.
-     `reduce_to_735kv.py` defaults to whichever bus this lands on (currently bus 339 — La
-     Grande-2-A + Robert-Bourassa storage, via placeholder `339 slack-placeholder`; **not** bus
-     340, which has zero storage capacity — an error that was in `GENERATORS.md` for a while), but
-     the 735kV AC PF work in this project has consistently used `114 ror` as slack instead (set
-     manually after reduction) — a real generator, not a placeholder.
+     zero-dispatch placeholder Generator (`p_max_pu = 0`) added so they can host the slack flag.
+     On the 315kV network this is bus 339 (`339 slack-placeholder`). The 735kV network uses
+     `114 ror`, set by `reduce_to_735kv.py --slack-generator`.
 4. **`run_pf.py`** — runs DC (`--method lpf`) or full AC (`--method pf`) power flow on a solved
-   network, using its dispatch as fixed injections (**not actually true on the 315kV network** —
-   see Current state below). DC PF has been clean throughout this whole
-   project on every network tried. AC PF has been the hard problem — see
+   network, using its dispatch as fixed injections (copies LOPF `p`/`p0` into `p_set` when
+   missing). DC PF reproduces LOPF flows. AC PF has been the hard problem — see
    `network/docs/POWER_FLOW.md`. Key things this script does specifically for AC PF: assigns
    generic power factors (0.95 load, 0.9 generator, tied to nameplate not dispatch), adds
    placeholder generators on storage-only buses for PV eligibility, classifies PV/PQ buses by a
@@ -113,16 +109,21 @@ project without re-deriving everything from scratch.
    loads/generators/storage from non-backbone buses onto the nearest backbone bus via graph
    shortest-path (real line length — NOT the straight-line method `reduce_voltage_network.py`
    uses). Preserves actual solved dispatch rather than re-deriving a ceiling; the reduced network
-   is never re-optimized. → produces `elec_735kv.nc`. Slack defaults to whichever bus has the
-   largest total generation capacity; set to `114 ror` manually afterward for AC PF work (see
-   step 3's slack note above). Then `scale_dispatch.py` makes the demand-scaled sensitivity
-   variants (e.g. `elec_735kv_scaled86.nc`) by scaling loads and dispatch together.
-6. **`export_to_matpower.py`** — exports a solved network to MATPOWER `.m` case format for an
-   independent AC PF cross-check, writing to both `network/` and
-   `C:\Users\hjgua\Documents\MATLAB\matpower8.1\data\`. Handles PyPSA's split per-unit conventions
-   (lines on an implicit 1 MVA base, transformers on their own `s_nom`) correctly — verified
-   numerically exact against source. Carries over shunt capacitors and a DC-PF-seeded starting
-   angle (both were missing and had to be added).
+   is never re-optimized. → produces `elec_735kv.nc` with slack `114 ror`. Then, in this order:
+   - `correct_sending_end_circuits.py` — 3 circuits on five 735kV corridors leaving major
+     generating stations (114-1291, 114-148, 340-457, 66-457, 651-25); recomputes r/x/b from HQ
+     per-km rates and scales `s_nom`. Must run before compensation (it resets x).
+   - `apply_series_compensation.py` — 70% on 15 lines, x computed from the uncompensated per-km
+     value (idempotent; never stacks).
+   - `add_shunt_impedance.py` — probe-sized shunt reactors/capacitors (reactors 100%, capacitors
+     70% of worst-hour need) → `elec_735kv_shunt.nc`.
+   - `summarize_735kv_acpf.py` — AC PF summary of no support / series / series + shunts →
+     `summary_735kv_acpf.csv`.
+6. **`export_to_matpower.py`** — exports one snapshot (default: worst-loaded hour) to MATPOWER
+   `.m` format for an independent AC PF cross-check (default output `network/`; copy to
+   MATPOWER's `data/` folder to run). Handles PyPSA's split per-unit conventions (lines on an
+   implicit 1 MVA base, transformers on their own `s_nom`). Carries shunts as bus `Bs` and a
+   DC-PF-seeded starting angle.
 7. `visualize_real_network_map.py` / `visualize_solved_network_map.py` / `visualize_ac_pf_map.py` /
    `visualize_congestion_zoom.py` — HTML + PNG map outputs (Plotly/Scattergeo, using Plotly's
    built-in Natural Earth basemap, not external map tiles — OSM's tile server and Carto's free
@@ -130,55 +131,40 @@ project without re-deriving everything from scratch.
    network, LOPF+DCPF congestion/dispatch/shedding, AC-PF-specific results (voltage
    magnitude/angle, diverging color scale), and a zoomed view of the most-congested lines.
 
-## Current state / open threads (as of 2026-09-24)
+## Current state / open threads (as of 2026-10-08)
 
 - **Line parameters**: every 315/345kV and 735/765kV line's r/x/b comes from Hydro-Québec's own
   line-characteristics table (`network/hq_line_characteristics_by_voltage.csv`, applied by
   `apply_hq_line_characteristics.py`, 345 treated as 315-tier and 765 as 735-tier); `st_clair.py`
-  reads the same table for its thermal-limit envelope. Nothing else supplies line parameters —
-  other voltage levels (unreduced `elec_full.nc` only) keep PyPSA-Earth's default type. The table's
-  69/120/161/230kV rows are transcribed but not applied to any line.
-- **735kV AC PF mechanism**: continuation (homotopy) power flow on every failing snapshot showed
-  genuine voltage collapse (Newton-Raphson's Jacobian went exactly singular — a saddle-node
-  bifurcation, not a solver quirk) at exactly **three buses** (308, 1291, 312), all fed only by
-  250-500km lines with no local voltage-controlling generation. Having no local generation isn't
-  itself predictive (36/58 buses share that trait harmlessly, e.g. bus 195 carries 10,354 MW with no
-  local gen but short lines); what matters is long line length combined with no genuinely
-  independent second path to a real source.
-- **Fix: circuit-count correction plus 70% series compensation on 15 lines**
-  (`correct_sending_end_circuits.py`; `apply_series_compensation.py`,
-  `COMPENSATION_FRACTION = 0.70`, a generic planning-level assumption not a measured HQ figure) —
-  matches real Hydro-Québec practice (3-circuit sending-end corridors, series compensation on long
-  corridors); treats the actual cause (undercounted circuits, line reactance) rather than adding a
-  device to work around it.
-- **735kV backbone** (`elec_735kv.nc`, 109 real lines, series compensation only — no shunt or
-  generator-based reactive support): **168/168** at current real demand (~30,200 MW mean,
-  calibrated against real whole-January-2022 HQ data). Max line loading 86.2%, 0 lines >= 90%.
-  Voltage 0.901–1.123pu; 17/58 buses fall below 0.95pu and 21/58 exceed 1.05pu at some hour.
-  `elec_735kv_scaled86.nc` (86% demand): 168/168, 73.4%, 3/58 under, 6/58 over.
-- **Voltage band not met**: a `ShuntImpedance` per affected bus is the standard fix
-  (`add_shunt_impedance.py`), but `b` is static — a reactor sized for the worst overvoltage hour
-  over-absorbs at other hours and pushes buses below 0.95pu. Not adopted into the committed network.
-  `network/quebec_735kv_ac_pf_map.html`/`.png` reflect the current 100%-demand network.
-- **315kV network** (`elec_solved.nc`, 205 buses): 0/168. `run_pf.py` never copies the LOPF
-  dispatch into `p_set` (which `n.pf()` reads), so on this network every generator, storage unit and
-  link injects zero real power in that test — any earlier statement that its failure is
-  independent of demand level came from that setup. With dispatch synced (in-memory) it still
-  fails 0/168, and the divergence localizes to a radial spur of buses 240, 1548, 1762, 1772, 2207,
-  3719, 1693, 3836, 2812 (removing it lets the lowest-demand hour converge) plus, at higher demand,
-  a wider set of buses that includes 308 and 469 (also 735kV problem buses). Root cause not found;
-  the `run_pf.py` gap is not yet fixed.
+  reads the same table for its thermal-limit envelope. Other voltage levels (unreduced
+  `elec_full.nc` only) keep PyPSA-Earth's default type.
+- **735kV AC PF mechanism**: continuation power flow on failing snapshots showed genuine voltage
+  collapse (Jacobian singular) at three buses (308, 1291, 312), all fed only by 250-500 km lines
+  with no local voltage-controlling generation. Too few circuits on the sending-end corridors made
+  their reactance up to 3x too high (PyPSA stores `x = x_per_km * length / num_parallel` per
+  `Line`), so peak-hour transfers exceeded what they could deliver.
+- **735kV convergence by pipeline step** (28,871 MW mean demand): after reduction 89/168; + circuit
+  correction 110/168; + 70% series compensation 168/168 (50% also gives 168/168); + shunts 168/168.
+  Both the circuit correction and series compensation are needed.
+- **735kV results** (`summary_735kv_acpf.csv`): series compensation only 0.904–1.123 pu, 14 buses
+  under / 14 over, max loading 60.6%; with shunts (5 capacitors +3,769 MVAr, 11 reactors
+  -6,106 MVAr) 0.966–1.059 pu, 0 under, 15 over for 16 overnight hours. A fixed `b` can't follow
+  demand; the remaining overvoltage needs switched shunts/SVCs.
+- **315kV network** (`elec_solved.nc`, 205 buses): LOPF 0% shed, max loading 71.9%; AC PF 1/168.
+  It lacks the circuit correction and series compensation (applied only after reduction to
+  735kV), and a radial spur of 315kV buses (240, 1548, 1762, 1772, 2207, 3719, 1693, 3836, 2812)
+  is a second divergence area. Next step: apply the corridor corrections before the 315kV LOPF.
+- **Line ratings**: `s_nom` is St Clair x 3, which inflates short lines (~2.8x HQ's cold thermal
+  rating) and ignores series compensation on long ones. A cold-rating test is in
+  `network/networks_test_hq_cold_735/`.
+- **Known gaps**: no generator Q limits in PyPSA's AC PF; HVDC terminal buses are DC-only islands
+  (445 MW of load served only via DC); 6 wind farms (438 MW) dropped as islands; no exports
+  modeled; capacity correction is manual. See `network/docs/ASSUMPTIONS_AND_LIMITATIONS.md`.
 - **`reduce_voltage_network.py`'s straight-line reassignment** was replaced with graph
-  shortest-path once (matching `reduce_to_735kv.py`'s method) and tested directly: AC PF barely
-  changed at 100% demand and got *worse* at 85% (168→159/168). Reverted back to straight-line.
-  The fix itself was real and correct (verified against real Quebec geography, e.g. the Gaspé
-  Peninsula case) but is a much larger-scope change at this stage (~4,000-bus raw graph, ~350
-  reassignments) than at the 735kV stage, and empirically hurts AC PF convergence rather than
-  helping — do not re-apply without re-testing.
-- **MATPOWER cross-check**: `export_to_matpower.py` exports one snapshot to MATPOWER for an
-  independent AC PF solve. An earlier, since-retired 115-line topology did not converge there;
-  the current 109-line network has converged in MATPOWER at both 100% and reduced demand. Not
-  re-run since the latest rebuild.
+  shortest-path once and tested: AC PF barely changed at 100% demand and got worse at 85%.
+  Reverted. Do not re-apply without re-testing.
+- **MATPOWER**: `network/quebec_735kv.m` (from `elec_735kv_shunt.nc`) and
+  `network/quebec_main_island.m` (from `elec_solved.nc`) are current; not yet re-solved in MATLAB.
 
 ## Working conventions established in this project
 

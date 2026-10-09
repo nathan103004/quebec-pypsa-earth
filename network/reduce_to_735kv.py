@@ -41,8 +41,8 @@ import pandas as pd
 import pypsa
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DEFAULT_NETWORK = os.path.join(BASE_DIR, "networks", "elec_solved.nc")
-DEFAULT_OUTPUT = os.path.join(BASE_DIR, "networks", "elec_735kv.nc")
+DEFAULT_NETWORK = os.path.join(BASE_DIR, "network", "networks_current", "elec_solved.nc")
+DEFAULT_OUTPUT = os.path.join(BASE_DIR, "network", "networks_current", "elec_735kv.nc")
 
 BACKBONE_VOLTAGES = [735.0, 765.0]
 UNIFIED_VOLTAGE = 735.0
@@ -88,6 +88,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--network", default=DEFAULT_NETWORK)
     parser.add_argument("--output", default=DEFAULT_OUTPUT)
+    parser.add_argument("--slack-generator", default="114 ror")
     args = parser.parse_args()
 
     print(f"Loading solved network: {args.network}")
@@ -192,12 +193,15 @@ def main():
         n.add("StorageUnit", name, **attrs)
         n.storage_units_t.p_set[name] = p_set
 
-    # Slack: largest-capacity plain Generator, excluding load_shedding.
-    # PyPSA's find_slack_bus()/find_bus_controls() only ever look at Generator
+    # Slack: --slack-generator (default 114 ror, Robert-Bourassa's run-of-river
+    # aggregate -- a real generator at the largest generation hub). Falls back
+    # to the largest-capacity plain Generator if absent. PyPSA's
+    # find_slack_bus()/find_bus_controls() only ever look at Generator
     # components, never StorageUnit.
-    print("\nAssigning slack (largest-capacity plain Generator, excluding load_shedding)...")
+    n.generators["control"] = "PQ"
     real_gens = n.generators[n.generators.carrier != "load_shedding"]
-    slack_gen = real_gens.p_nom.idxmax()
+    slack_gen = args.slack_generator if args.slack_generator in n.generators.index else real_gens.p_nom.idxmax()
+    print(f"\nAssigning slack: '{slack_gen}'")
     n.generators.loc[slack_gen, "control"] = "Slack"
     print(f"  Slack generator: '{slack_gen}' at bus {n.generators.at[slack_gen,'bus']} "
           f"({n.generators.at[slack_gen,'p_nom']:.0f} MW)")

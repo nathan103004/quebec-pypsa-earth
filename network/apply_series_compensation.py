@@ -21,11 +21,11 @@ Targets 15 lines across two groups:
 The short (95.8km) 312-310 line is deliberately excluded: it isn't part of
 the long-line problem this is fixing.
 
-Applied on top of apply_hq_line_characteristics.py and
-correct_sending_end_circuits.py (after both have set the line's real r/x/b
--- this just scales x down further), and before reduce_voltage_network.py,
-since these are original OSM line ids that pass through every later
-reduction stage unchanged.
+Runs on the 735kV network, after correct_sending_end_circuits.py. x is
+recomputed from Hydro-Quebec's uncompensated per-km 735kV reactance,
+x = x_per_km * length / num_parallel * (1 - k), so the result is exactly k
+regardless of any compensation already on the line (running it twice does
+not stack).
 
 COMPENSATION_FRACTION (0.70) is a generic, undocumented-in-real-data
 assumption -- typical real-world EHV series compensation runs roughly
@@ -37,11 +37,13 @@ compensation degrees -- not modeled here (steady-state power flow only).
 
 Usage
 -----
-    python network/apply_series_compensation.py --network networks/elec_full.nc --output networks/elec_full_seriescomp.nc
+    python network/apply_series_compensation.py --network networks_current/elec_735kv.nc --in-place
 """
 import argparse
 
 import pypsa
+
+from apply_hq_line_characteristics import VOLTAGE_TIER_MAP, load_hq_params
 
 COMPENSATION_FRACTION = 0.70
 
@@ -72,7 +74,10 @@ def apply_compensation(n: pypsa.Network, lines=None, fraction: float = COMPENSAT
         print(f"  [warn] {len(missing)} target line(s) not present in this network, skipping: {missing}")
     present = [l for l in lines if l in n.lines.index]
     old_x = n.lines.loc[present, "x"].copy()
-    n.lines.loc[present, "x"] = old_x * (1 - fraction)
+    ref = load_hq_params()
+    for l in present:
+        x_per_km = ref.loc[VOLTAGE_TIER_MAP[n.lines.at[l, "v_nom"]], "xl_ohm_per_km"]
+        n.lines.at[l, "x"] = x_per_km * n.lines.at[l, "length"] / n.lines.at[l, "num_parallel"] * (1 - fraction)
     n.calculate_dependent_values()
     print(f"Applied {fraction:.0%} series compensation to {len(present)} lines:")
     for l in present:

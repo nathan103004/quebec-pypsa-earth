@@ -32,8 +32,8 @@ which ignores r, Q, shunts, and PV/PQ classification entirely):
 
 Usage
 -----
-    python network/run_pf.py --network networks/elec_solved.nc --method lpf
-    python network/run_pf.py --network networks/elec_solved.nc --method pf
+    python network/run_pf.py --network network/networks_current/elec_solved.nc --method lpf
+    python network/run_pf.py --network network/networks_current/elec_735kv.nc --method pf --pv-min-capacity 0 --pv-max-load-ratio 1
 """
 import argparse
 import os
@@ -43,7 +43,7 @@ import pandas as pd
 import pypsa
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DEFAULT_NETWORK = os.path.join(BASE_DIR, "networks", "elec_solved.nc")
+DEFAULT_NETWORK = os.path.join(BASE_DIR, "network", "networks_current", "elec_solved.nc")
 
 TRANSFORMER_X_R_RATIO = 30.0
 LOAD_POWER_FACTOR = 0.95
@@ -58,6 +58,17 @@ V_MAG_PU_MAX = 1.05
 # elec_solved.nc; use 0 / 1 for elec_735kv.nc.
 PV_MIN_CAPACITY_MW = 100.0
 PV_MAX_LOAD_RATIO = 0.10
+
+
+def use_lopf_dispatch_as_setpoints(n: pypsa.Network) -> None:
+    """n.pf()/n.lpf() read p_set, but a network straight out of LOPF holds its
+    dispatch in p (generators, storage) and p0 (links). Copies it over where
+    p_set is missing. Networks from reduce_to_735kv.py already carry p_set."""
+    for c, out in [("generators", "p"), ("storage_units", "p"), ("links", "p0")]:
+        t = getattr(n, c + "_t")
+        if not t[out].empty and t["p_set"].empty:
+            t["p_set"] = t[out].copy()
+            print(f"  Copied LOPF dispatch ({c}.{out}) into p_set")
 
 
 def prepare_for_ac_pf(n: pypsa.Network, pv_min_capacity: float = PV_MIN_CAPACITY_MW,
@@ -153,6 +164,7 @@ def main():
     n = pypsa.Network(args.network)
     print(f"  {len(n.buses)} buses, {len(n.snapshots)} snapshots")
 
+    use_lopf_dispatch_as_setpoints(n)
     n.determine_network_topology()
     print("\nSub-networks:")
     print(n.sub_networks)

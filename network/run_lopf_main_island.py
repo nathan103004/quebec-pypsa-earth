@@ -25,7 +25,7 @@ sys.path.insert(0, NETWORK_DIR)
 from st_clair import load_line_params, st_clair_s_nom_mva  # noqa: E402
 from attach_hydro_dispatch_2022 import align_to_snapshots  # noqa: E402
 
-DEFAULT_NETWORK = os.path.join(BASE_DIR, "networks", "elec_reduced.nc")
+DEFAULT_NETWORK = os.path.join(BASE_DIR, "network", "networks_current", "elec_reduced.nc")
 SOURCES_CSV = os.path.join(NETWORK_DIR, "2022-sources-electricite-quebec.csv")
 
 # St Clair (network/st_clair.py) is a planning-level analytical envelope
@@ -53,10 +53,9 @@ CEILING_MARGIN = 1.10
 # totals only for buses matched to one of Quebec's 17 real administrative
 # regions -- buses outside that scope keep smaller synthetic values and are
 # never rescaled. This closes that gap against real system-wide demand.
-# Calibrated against the real whole-January-2022 mean system demand (32,421
-# MW, historique-demande-electricite-quebec.csv) rather than the single
-# solved week alone.
-DEMAND_SCALE_FACTOR = 1.1142
+# Calibrated against the real mean system demand of the solved week
+# (2022-01-01 to 2022-01-07: 28,870 MW, historique-demande-electricite-quebec.csv).
+DEMAND_SCALE_FACTOR = 1.0653
 
 
 def largest_island_buses(n: pypsa.Network) -> set:
@@ -146,8 +145,10 @@ def main():
     print("  OCGT marginal_cost -> -0.30 $/MWh (prefers dispatch up to its real ceiling over shedding)")
 
     onwind = n.generators.index[n.generators.carrier == "onwind"]
-    n.generators.loc[onwind, "marginal_cost"] = 0.0
-    print(f"  {len(onwind)} onwind generator(s) set to marginal_cost = 0.0 $/MWh")
+    # Slightly negative so available wind is dispatched before zero-cost hydro;
+    # at 0.0 the tie with ror/storage lets the solver curtail wind arbitrarily.
+    n.generators.loc[onwind, "marginal_cost"] = -0.1
+    print(f"  {len(onwind)} onwind generator(s) set to marginal_cost = -0.1 $/MWh")
 
     print("Computing r/x/b from line `type` + length...")
     n.calculate_dependent_values()
@@ -267,7 +268,9 @@ def main():
     else:
         su_cap = su_only.loc[su_only.bus == slack_bus, "p_nom"].sum()
         slack_gen = f"{slack_bus} slack-placeholder"
-        n.add("Generator", slack_gen, bus=slack_bus, carrier="AC", p_nom=su_cap, control="Slack")
+        # p_max_pu=0: the placeholder exists only to carry the slack flag;
+        # without it LOPF treats it as free, uncapped generation.
+        n.add("Generator", slack_gen, bus=slack_bus, carrier="AC", p_nom=su_cap, p_max_pu=0.0, control="Slack")
         print(f"  '{slack_bus}' is storage-only ({su_cap:.0f} MW) -- added zero-dispatch "
               f"placeholder Generator '{slack_gen}' there so it can be recognized as slack.")
     print(f"Slack generator: '{slack_gen}' at bus {slack_bus} "
@@ -306,7 +309,7 @@ def main():
     loading = (n.lines_t.p0.abs() / n.lines.s_nom).max()
     print(f"\nLine loading: max={loading.max():.1%}, lines >=90% loaded: {(loading>=0.9).sum()}/{len(n.lines)}")
 
-    output = args.output or os.path.join(BASE_DIR, "networks", "elec_solved.nc")
+    output = args.output or os.path.join(BASE_DIR, "network", "networks_current", "elec_solved.nc")
     n.export_to_netcdf(output)
     print(f"\nSaved solved network -> {output}")
 

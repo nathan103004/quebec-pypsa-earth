@@ -57,9 +57,9 @@ BASE_DIR = os.path.dirname(NETWORK_DIR)
 sys.path.insert(0, NETWORK_DIR)
 import run_pf  # noqa: E402 -- same PV/PQ/slack classification as the live AC PF run
 
-DEFAULT_NETWORK = os.path.join(BASE_DIR, "networks", "elec_solved.nc")
-# Writes directly to MATPOWER's data folder, where it's actually run from.
-DEFAULT_OUTPUT = r"C:\Users\hjgua\Documents\MATLAB\matpower8.1\data\quebec_main_island.m"
+DEFAULT_NETWORK = os.path.join(BASE_DIR, "network", "networks_current", "elec_solved.nc")
+# Copy the .m file into MATPOWER's data folder (or addpath it) to run it.
+DEFAULT_OUTPUT = os.path.join(NETWORK_DIR, "quebec_main_island.m")
 
 BASE_MVA = 100.0
 GEN_PF_ASSUMED = 0.85  # generic reactive-capability assumption, not measured
@@ -163,7 +163,7 @@ def main():
     pf_angle = np.arccos(0.95)
     load_q_by_bus = load_p_by_bus * np.tan(pf_angle)
 
-    # Shunt capacitors: MATPOWER's Gs/Bs are real MW/MVAr demanded/injected at
+    # Shunt capacitors (b > 0) and reactors (b < 0): MATPOWER's Gs/Bs are real MW/MVAr demanded/injected at
     # V=1.0pu, not a per-unit value; PyPSA's b (Siemens) -> b_pu = b * v_nom**2
     # (implicit 1 MVA base) numerically equals that same MVAr figure at V=1pu,
     # so no further base rescaling is needed here (unlike branch r/x below).
@@ -172,7 +172,7 @@ def main():
     if len(shunts):
         b_mvar = shunts.b * shunts.bus.map(n.buses.v_nom) ** 2
         bs_by_bus = b_mvar.groupby(shunts.bus).sum().reindex(buses.index, fill_value=0.0)
-        print(f"  {len(shunts)} shunt capacitors carried over ({bs_by_bus.sum():.0f} MVAr total at V=1.0pu)")
+        print(f"  {len(shunts)} shunts carried over ({bs_by_bus.sum():.0f} MVAr net at V=1.0pu, positive = capacitive)")
 
     slack_gen = n.generators.index[n.generators.control == "Slack"]
     slack_bus = n.generators.at[slack_gen[0], "bus"] if len(slack_gen) else buses.index[0]

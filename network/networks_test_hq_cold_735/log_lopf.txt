@@ -1,0 +1,160 @@
+Warning 3: Cannot find header.dxf (GDAL_DATA is not defined)
+Cannot find header.dxf (GDAL_DATA is not defined)
+C:\Users\hjgua\miniconda3\envs\pypsa-earth\Lib\site-packages\xarray\backends\plugins.py:110: RuntimeWarning: Engine 'cfgrib' loading failed:
+Cannot find the ecCodes library
+  external_backend_entrypoints = backends_dict_from_pkg(entrypoints_unique)
+Warning 3: Cannot find gdalvrt.xsd (GDAL_DATA is not defined)
+INFO:pypsa.io:Imported network elec_reduced.nc has buses, carriers, generators, lines, links, loads, storage_units, transformers
+WARNING:pypsa.consistency:The following generators have carriers which are not defined:
+Index(['1 load_shedding', '24 load_shedding', '800 load_shedding',
+       '42 load_shedding', '45 load_shedding', '64 load_shedding',
+       '1015 load_shedding', '84 load_shedding', '109 load_shedding',
+       '111 load_shedding',
+       ...
+       '3078 load_shedding', '3227 load_shedding', '3233 load_shedding',
+       '3835 load_shedding', '2 load_shedding', '136 load_shedding',
+       '3582 load_shedding', '3837 load_shedding', '3859 load_shedding',
+       '677 load_shedding'],
+      dtype='object', name='Generator', length=189)
+WARNING:pypsa.consistency:The following transformers have zero r, which could break the linear load flow:
+Index(['transf_0_1', 'transf_8_3', 'transf_14_2', 'transf_25_0', 'transf_36_1',
+       'transf_47_1', 'transf_48_0', 'transf_55_2', 'transf_55_3',
+       'transf_56_1', 'transf_60_2', 'transf_74_1', 'transf_79_1',
+       'transf_127_0', 'transf_132_0', 'transf_135_0', 'transf_150_0',
+       'transf_211_1', 'transf_217_3', 'transf_333_1', 'transf_1154_0',
+       'transf_2066_0'],
+      dtype='object', name='Transformer')
+WARNING:pypsa.consistency:The following generators have carriers which are not defined:
+Index(['1 load_shedding', '24 load_shedding', '800 load_shedding',
+       '42 load_shedding', '45 load_shedding', '64 load_shedding',
+       '1015 load_shedding', '84 load_shedding', '109 load_shedding',
+       '111 load_shedding',
+       ...
+       '3078 load_shedding', '3227 load_shedding', '3233 load_shedding',
+       '3835 load_shedding', '2 load_shedding', '136 load_shedding',
+       '3582 load_shedding', '3837 load_shedding', '3859 load_shedding',
+       '677 load_shedding'],
+      dtype='object', name='Generator', length=189)
+WARNING:pypsa.consistency:The following transformers have zero r, which could break the linear load flow:
+Index(['transf_0_1', 'transf_8_3', 'transf_14_2', 'transf_25_0', 'transf_36_1',
+       'transf_47_1', 'transf_48_0', 'transf_55_2', 'transf_55_3',
+       'transf_56_1', 'transf_60_2', 'transf_74_1', 'transf_79_1',
+       'transf_127_0', 'transf_132_0', 'transf_135_0', 'transf_150_0',
+       'transf_211_1', 'transf_217_3', 'transf_333_1', 'transf_1154_0',
+       'transf_2066_0'],
+      dtype='object', name='Transformer')
+INFO:linopy.model: Solve problem using Highs solver
+INFO:linopy.io:Writing objective.
+Loading network: networks_current/elec_reduced.nc
+  210 buses total
+  Limited to first 168 snapshots (2022-01-01 00:00:00 to 2022-01-07 23:00:00)
+Largest connected island: 205 / 210 buses
+After extraction: 205 buses, 276 lines, 72 generators, 22 storage units, 647 loads
+Total demand (mean): 27101 MW
+Total generation capacity: 46069 MW
+Scaling demand up by 1.065x globally...
+  New total demand (mean): 28871 MW
+Assigning marginal costs by carrier from resources/costs_2030_elec.csv...
+  ror: marginal_cost = 0.0000 $/MWh
+  OCGT: marginal_cost = 64.6840 $/MWh
+  onwind: marginal_cost = 0.0150 $/MWh
+  solar: marginal_cost = 0.0100 $/MWh
+  hydro (storage): marginal_cost = 0.0000 $/MWh
+Re-enabling OCGT with a real, time-varying ceiling from Thermique data...
+  1 OCGT generator(s): p_max_pu = real Thermique(t)/capacity * 1.10 (mean=0.0399, max=1.097)
+  OCGT marginal_cost -> -0.30 $/MWh (prefers dispatch up to its real ceiling over shedding)
+  33 onwind generator(s) set to marginal_cost = -0.1 $/MWh
+Computing r/x/b from line `type` + length...
+Recomputing s_nom for all 276 lines from the St Clair curve, x3 margin...
+  s_nom (MVA): old mean=3203, new mean=6784 (ratio 2.12x)
+Raising all 22 transformers to a flat 100000 MVA...
+Relaxing ror from forced-exact dispatch to ceiling-only...
+  Cleared forced-minimum on 25 ror generators and 0 hydro storage units
+Applying the same 1.10x headroom margin to ror's real ceiling...
+  Rescaled p_max_pu on 25 ror generators (mean=0.846)
+Bounding hydro storage dispatch by the same real fleet-wide ratio that caps ror...
+  Set p_max_pu = uniform_cf(t) * 1.10 (clipped at 1.0) on 22 hydro storage units (mean=0.692)
+329-3975 DC tie not present in this run's largest island -- skipping its capacity fix.
+Relaxing lines from the default n-1 security margin (s_max_pu=0.7) to 1.0...
+  Relaxed s_max_pu to 1.0 on 273 / 276 lines (were 0.7)
+Adding VOLL load-shedding generators (10000 $/MWh) at every load bus...
+  Added 189 load-shedding generators
+Assigning slack (largest total generation capacity bus)...
+  '339' is storage-only (7722 MW) -- added zero-dispatch placeholder Generator '339 slack-placeholder' there so it can be recognized as slack.
+Slack generator: '339 slack-placeholder' at bus 339 (7722 MW total generation capacity there)
+
+Running LOPF (solver=highs)...
+Writing constraints.:   0%|[38;2;128;191;255m          [0m| 0/18 [00:00<?, ?it/s]Writing constraints.:  11%|[38;2;128;191;255m#1        [0m| 2/18 [00:00<00:01, 11.15it/s]Writing constraints.:  22%|[38;2;128;191;255m##2       [0m| 4/18 [00:00<00:01, 10.70it/s]Writing constraints.:  83%|[38;2;128;191;255m########3 [0m| 15/18 [00:00<00:00, 23.63it/s]Writing constraints.: 100%|[38;2;128;191;255m##########[0m| 18/18 [00:00<00:00, 22.51it/s]Writing constraints.: 100%|[38;2;128;191;255m##########[0m| 18/18 [00:00<00:00, 20.73it/s]
+Writing continuous variables.:   0%|[38;2;128;191;255m          [0m| 0/8 [00:00<?, ?it/s]Writing continuous variables.:  25%|[38;2;128;191;255m##5       [0m| 2/8 [00:00<00:00, 17.24it/s]Writing continuous variables.: 100%|[38;2;128;191;255m##########[0m| 8/8 [00:00<00:00, 52.86it/s]
+INFO:linopy.io: Writing time: 1.07s
+Running HiGHS 1.14.0 (git hash: n/a): Copyright (c) 2026 under MIT licence terms
+LP linopy-problem-ek5cpyzd has 266784 rows; 109704 cols; 450890 nonzeros
+Coefficient ranges:
+  Matrix  [4e-01, 5e+01]
+  Cost    [3e-01, 3e+05]
+  Bound   [1e-06, 5e+03]
+  RHS     [1e-06, 4e+07]
+WARNING: Problem has some excessively small column bounds
+WARNING: Problem has some excessively small row bounds
+WARNING: Problem has some excessively large row bounds
+WARNING:    Consider scaling the    bounds by 1e-2, or setting the user_bound_scale option to -6
+Presolving model
+43095 rows, 92899 cols, 187548 nonzeros 0s
+30164 rows, 79968 cols, 166047 nonzeros 0s
+26198 rows, 56377 cols, 137317 nonzeros 2s
+Dependent equations search running on 26037 equations with time limit of 1000.00s
+Dependent equations search removed 0 rows and 0 nonzeros in 0.00s (limit = 1000.00s)
+26037 rows, 56216 cols, 138922 nonzeros 3s
+Presolve reductions: rows 26037(-240747); columns 56216(-53488); nonzeros 138922(-311968) 
+Solving the presolved LP
+Using dual simplex solver
+  Iteration        Objective     Infeasibilities num(sum)
+          0     0.0000000000e+00 Ph1: 0(0) 3.3s
+      26737    -3.2391616785e+05 Pr: 0(0) 4.8s
+
+Performed postsolve
+Solving the original LP from the solution after postsolve
+
+Model name          : linopy-problem-ek5cpyzd
+Model status        : Optimal
+Simplex   iterations: 26737
+Objective value     : -3.2391616707e+05
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          5.05
+Writing the solution to C:\Users\hjgua\AppData\Local\Temp\linopy-solve-mhswg2mj.sol
+INFO:linopy.constants: Optimization successful: 
+Status: ok
+Termination condition: optimal
+Solution: 109704 primals, 266784 duals
+Objective: -3.24e+05
+Solver model: available
+Solver message: Optimal
+
+INFO:pypsa.optimization.optimize:The shadow-prices of the constraints Generator-fix-p-lower, Generator-fix-p-upper, Line-fix-s-lower, Line-fix-s-upper, Transformer-fix-s-lower, Transformer-fix-s-upper, Link-fix-p-lower, Link-fix-p-upper, StorageUnit-fix-p_dispatch-lower, StorageUnit-fix-p_dispatch-upper, StorageUnit-fix-p_store-lower, StorageUnit-fix-p_store-upper, StorageUnit-fix-state_of_charge-lower, StorageUnit-fix-state_of_charge-upper, Kirchhoff-Voltage-Law, StorageUnit-energy_balance were not assigned to the network.
+C:\Users\hjgua\Desktop\Power Eng\PyPSA\pypsa-earth\network\run_lopf_main_island.py:298: FutureWarning: DataFrame.groupby with axis=1 is deprecated. Do `frame.T.groupby(...)` without axis instead.
+  n.generators_t.p[real_gens].groupby(n.generators.loc[real_gens, "carrier"], axis=1).sum().mean(),
+C:\Users\hjgua\Desktop\Power Eng\PyPSA\pypsa-earth\network\run_lopf_main_island.py:299: FutureWarning: DataFrame.groupby with axis=1 is deprecated. Do `frame.T.groupby(...)` without axis instead.
+  n.storage_units_t.p.groupby(n.storage_units.carrier, axis=1).sum().mean().rename(lambda c: c + " (storage)"),
+INFO:pypsa.io:Exported network 'elec_solved.nc' contains: loads, lines, storage_units, buses, generators, transformers, links, carriers
+Status: ok, condition: optimal
+
+Objective: -323,916
+Total demand: 126,452,995 MWh
+Total shed: 0 MWh (0.00%)
+
+Dispatch by carrier (mean MW):
+AC                     0.000000
+OCGT                  16.401786
+onwind               690.329271
+ror                 4586.735116
+solar                  0.000000
+hydro (storage)    23577.080528
+load_shedding          0.000000
+dtype: float64
+
+0 / 189 buses have any shedding. Top 10:
+Series([], dtype: float64)
+
+Line loading: max=80.4%, lines >=90% loaded: 0/276
+
+Saved solved network -> networks_test_hq_cold_735/elec_solved.nc

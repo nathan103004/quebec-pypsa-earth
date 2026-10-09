@@ -27,8 +27,9 @@ All under `network/`:
   [ASSUMPTIONS_AND_LIMITATIONS.md](ASSUMPTIONS_AND_LIMITATIONS.md) for buses outside that match.
 - `historique-demande-electricite-quebec.csv` -- real hourly Hydro-Québec system-wide demand,
   full year 2022. Used to calibrate `DEMAND_SCALE_FACTOR` in `run_lopf_main_island.py` against
-  the real whole-January-2022 mean (32,421 MW), and to validate the solved network's demand
-  shape/level (correlation 0.979 against this series once timezone-aligned correctly).
+  the real mean of the solved week (2022-01-01 to 2022-01-07, 28,870 MW), and to validate the
+  solved network's demand shape/level (correlation 0.979 against this series once
+  timezone-aligned correctly).
 
 ## Line electrical parameters
 

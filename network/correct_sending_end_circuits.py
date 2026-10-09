@@ -20,14 +20,16 @@ directly on that line.
 r, x and b are then recomputed from Hydro-Quebec's per-km 735kV rates (the
 same table and formula as apply_hq_line_characteristics.py) using the
 corrected num_parallel, so the effect is consistent with how every other
-735/765kV line's parameters are derived. s_nom is left untouched here --
-run_lopf_main_island.py recomputes it from the St Clair curve using
-num_parallel, so it picks up the correction automatically as long as this
-script runs beforehand.
+735/765kV line's parameters are derived. s_nom is scaled by the same
+circuit-count ratio, since it was computed per Line object upstream.
+
+Runs on the 735kV network (after reduce_to_735kv.py) and before
+apply_series_compensation.py -- recomputing x here resets any compensation
+already applied to these lines.
 
 Usage
 -----
-    python network/correct_sending_end_circuits.py --network networks/elec_full_hq.nc --output networks/elec_full_hq_circuits.nc
+    python network/correct_sending_end_circuits.py --network networks_current/elec_735kv.nc --in-place
 """
 import argparse
 
@@ -56,18 +58,19 @@ def correct_circuits(n: pypsa.Network, corrections: dict = NEW_NUM_PARALLEL) -> 
     if missing:
         print(f"  [warn] {len(missing)} target line(s) not present in this network, skipping: {sorted(missing)}")
 
-    old = n.lines.loc[list(present), ["num_parallel", "r", "x", "b"]].copy()
+    old = n.lines.loc[list(present), ["num_parallel", "r", "x", "b", "s_nom"]].copy()
     for l, npar in present.items():
         tier = VOLTAGE_TIER_MAP[n.lines.at[l, "v_nom"]]
         row = ref.loc[tier]
         length = n.lines.at[l, "length"]
+        n.lines.at[l, "s_nom"] *= npar / max(n.lines.at[l, "num_parallel"], 1e-9)
         n.lines.at[l, "num_parallel"] = npar
         n.lines.at[l, "r"] = row["r_ohm_per_km"] * length / npar
         n.lines.at[l, "x"] = row["xl_ohm_per_km"] * length / npar
         n.lines.at[l, "b"] = row["bc_uS_per_km"] * 1e-6 * length * npar
     n.calculate_dependent_values()
 
-    new = n.lines.loc[list(present), ["num_parallel", "r", "x", "b"]]
+    new = n.lines.loc[list(present), ["num_parallel", "r", "x", "b", "s_nom"]]
     diff = old.join(new, lsuffix="_old", rsuffix="_new")
     print(f"Corrected circuit count on {len(present)} sending-end lines:")
     print(diff.round(2).to_string())

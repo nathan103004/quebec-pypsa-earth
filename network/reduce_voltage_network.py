@@ -39,7 +39,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 NETWORK_DIR = os.path.dirname(os.path.abspath(__file__))
 GADM_PATH = os.path.join(BASE_DIR, "data", "gadm", "gadm41_CAN", "gadm41_CAN.gpkg")
 
-DEFAULT_NETWORK = os.path.join(BASE_DIR, "networks", "elec_full.nc")
+DEFAULT_NETWORK = os.path.join(BASE_DIR, "network", "networks_current", "elec_full.nc")
 
 CHURCHILL_735_LAT = 53.5289404
 CHURCHILL_735_LON = -63.9768688
